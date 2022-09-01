@@ -1,0 +1,61 @@
+---
+title: "A Brief Review of Democratic and Authoritarian Datasets"
+output: rmarkdown::html_vignette
+authors: 
+  - Joshua Brinks
+date: April 13, 2021
+bibliography: "civil-liberties.bib"
+vignette: >
+  %\VignetteIndexEntry{A Brief Review of Democratic and Authoritarian Datasets}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+Researchers and practitioners of the natural scientists are blessed with the ability to directly observe several measures of interest, but social and political scientists are cursed with the un-observable; the latent variable. Data products measuring civil liberties and levels of national democracy and authoritarianism have become a core component of social and political science. Comparative measures of democracy and civil liberties at the extremes is simple; France is clearly more democratic than North Korea. Comparing slight deviations across like-minded countries is more nuanced. Is Canada more democratic than Norway? Conversely, is Yemen more authoritarian than Chad. How do these relationships change over time, and what are effective ways to quantify inherently qualitative concepts of freedom, civil liberties, and governance?
+
+Multiple datasets attempt to answer these questions. Some of the most widely used include [Varieties of Democracy](https://www.v-dem.net/) [@Coppedge2020], Freedom House's [Freedom in the World](https://freedomhouse.org/report/freedom-world) [@FreedomHouse2021], the Economist Intelligence Unit's [Democracy Index](https://www.eiu.com/n/campaigns/democracy-index-2021/) [@EconomistIntelligenceUnit2020], and [Polity V](https://www.systemicpeace.org/polityproject.html) [@Marshall2020]. Although all the aforementioned datasets grapple with similar concepts, they vary in their transparency of methods, level of aggregation, temporal coverage, frequency of updates, and irregular data availability across countries and time. Moreover, their *definitions* of democracy and civil liberties may differ greatly [@Cheibub2010]. The primary disadvantage of all of these indices is a reliance on subjective judgments by teams of experts, which may be exacerbated by vague questions and inconsistent coding between team members [@Cheibub2010; @Michalik2015; @Wig2015] . When combined with a lack of transparency in methods, assessing uncertainty and making informed comparisons across datasets becomes increasingly difficult.
+
+Freedom House's Freedom in the World offers a moderate temporal record (1972-) and somewhat disaggregated indicators of specific forms of civil liberties such as the electoral process, government functionality, and rights to assembly. The limited number of indicators constituting their primary composite indices of Civil Liberties and Political Rights make navigating the raw data an easier process, but the components are very abstract and they lack transparency for certain methodologies, which makes interpretation difficult. Similarly, the Polity V dataset also presents a moderately disaggregated approach to their dataset, but the concepts are also very abstract. The primary composite indices for both datasets employ ordinal scoring systems that span a 13 (Freedom House) and 21 (Polity V) point scale. This allows users to make more granular distinctions between levels of democracy across a set of nation-states when compared to datasets that rely on binary flags for autocracies, dictatorships, or democracies. That said, Polity V and Freedom House have some level of obfuscation in their methodologies and do not provide internal measures of inter-coder reliability. Analysis of the correlation between Freedom House's and Polity V's two primary metrics shows a high level of correlation (0.88) between the 2 datasets [@Coppedge2017]. Despite high correlation, Casper and Tufis (2003) [@Casper2003] reported large shifts in statistical significance when substituting key metrics from Polity, Polyarchy [@Vanhanen2000], and Freedom House indices. Högström et al. (2013) [@Hogstrom2013] found similar results comparing statistical significance and variable effects when exchanging Polity and Freedom House indices. These studies are 10-20 years old at this point, but users should proceed with caution.
+
+```{r sample-image, echo=FALSE, fig.cap="Global map of Varieties of Democracy's 2021 'v2x_lbdem' composite metric. Raw V-Dem data is tabular, but depicted here using a choropleth.", warning=FALSE, message=FALSE, fig.pos='center', fig.height=4.5, fig.width=7}
+
+library(data.table)
+library(sf)
+library(rnaturalearth)
+
+vdem.raw <- demcon::get_vdem()
+data.table::setDT(vdem.raw)
+
+metrics<-c('v2x_libdem')
+
+id.vars<-c('country_name', 'COWcode','histname' ,'codingstart_contemp', 'codingend_contemp','year')
+vars<-c(id.vars, metrics)
+
+vdem<-vdem.raw[year==max(year), ..vars]
+rm(vdem.raw)
+
+global<-rnaturalearth::ne_countries(returnclass = 'sf')
+global$cow<-countrycode::countrycode(global$iso_a3, origin = "iso3c", destination = "cown")
+global<-merge(
+  global, vdem,
+  by.x = "cow", by="COWcode", all.x = TRUE
+)
+
+plot(global[, "v2x_libdem"], graticule = TRUE, key.pos = 1, axes = TRUE, key.width = lcm(1.3), key.length = 1.0)
+
+```
+
+In contrast with Polity V and Freedom House's Freedom in the World, the Economist Intelligence Unit's Democracy Index presents a more disaggregated approach to assessing global democracy. The Democracy Index consists of 60 indicators across 5 categories that measure pluralism, civil liberties, and political culture. These indicators are used to rank countries and place them into 4 categorical regime types: *full democracies*, *flawed democracies*, *hybrid regimes*, and *authoritarian regimes*. The Democracy Index is a more flexible framework due to a higher level of disaggregation, however, it's limited in that it only provides data for 2006 until the present. Moreover, the Democracy Index is behind a pay-wall and relies heavily on polling data that is highly intermittent for many countries. This introduces bias and limits comparisons across countries [@Wig2015; @Coppedge2017]. This introduces bias and limits comparisons across countries. Because of the limited temporal coverage, potential sources of bias, and it being developed and maintained by *The Economist*, the Democracy Index is more widely used in journalistic reporting than academic research where long established datasets like Polity and Freedom House reign supreme. That said, the Democracy Index still maintains a moderate presence across modern academic investigations of nation-state democracy and should not be dismissed outright.
+
+The Varieties of Democracy (V-Dem) dataset puts forth an even greater collection of disaggregated indicators (400+) depicting wide-ranging measures of democracy dating back to 1789. The size of V-Dem's database is staggering, and even a bit intimidating, but they do offer a handful of high level composite indices more analogous to Polity and Freedom House. Additionally, there is the [vdemdata](https://xmarquez.github.io/vdem/) R package [@V-DemInstitute2020] that provides search functionality and the ability to directly access the most recent version of the database directly from the V-Dem servers. One point of contrast for V-Dem is that it does not set out to define democracy for the user. Instead, V-Dem sets out to measure 7 core properties of democracy. These include highly disaggregated and clear assessments of *electoral*, *liberal*, *majoritarian*, *consensual*, *participatory*, *deliberative*, and *egalitarian* properties of democracy [@Coppedge2020]. This allows users to select the individual components most important to them and create composite variables that directly relate to their analysis. V-Dem is also transparent in their methodologies. They employ multiple independent coding teams, inter-coder reliability tests, confidence intervals for point estimates, and access to individual coder-level scoring [@Coppedge2017]. V-Dem requires some initial overhead to navigate the database for use in research or production pipelines, but many of my projects have been adopting the database in favor of Polity and Freedom House.
+
+None of these datasets are unequivocally superior to another. In some instances, highly focused binary flags for aspects of democracy and governance will be sufficient. In others, more detailed ordinal measures may be required to illuminated nuanced difference across target nations. Likewise, users may have specific requirements for target metrics, temporal coverage, and included nation-states. As always, the analyst must decide what's appropriate for their intended use case.
+
+# Reference

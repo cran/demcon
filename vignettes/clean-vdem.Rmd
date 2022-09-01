@@ -1,0 +1,264 @@
+---
+title: "Pre-Processing the Varieties of Democracy Dataset"
+output: rmarkdown::html_vignette
+authors: 
+  - Joshua Brinks
+bibliography: "civil-liberties.bib"
+vignette: >
+  %\VignetteIndexEntry{Pre-Processing the Varieties of Democracy Dataset}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(knitr)
+library(kableExtra)
+```
+
+## Introduction
+
+This guide is an entry in a series of proposed vignettes in which we walk through a deep cleaning or exploratory data analysis (EDA) of a widely employed environment-security dataset. For this entry, we will explore the Varieties of Democracy dataset (V-Dem; @Coppedge2020). V-Dem is a massive dataset that aims to provide quantitative assessments of historical and nation-state democracy. V-Dem provides both multidimensional and disaggregated measures of democracy across five primary principals: electoral, liberal, participatory, deliberative, and egalitarian [@Pemstein2018]. The V-Dem team is comprised of dozens of scientists spread across the globe working with thousands of local experts to quantify local and regional aspects of democracy. 
+
+V-Dem is not alone in its efforts to quantify qualitative aspects of nation-state democracy, civil liberties, and elections. Similar datasets include Polity5 [@Marshall2002], Freedom House's Freedom in the World, Countries at the Crossroads, and Freedom of the Press [@FreedomHouse2014], and the Institutions and Elections Project [@Wig2015]. Although these datasets are similar in many ways, V-Dem stands out with the sheer number of metrics included. V-Dem features over 470 indicators, 82 indices, and 5 high-level metrics. That is an overwhelming amount of data on par with the World Development Indicators [@TheWorldBank2017]. Let's get started.
+
+### Acquiring the Data
+
+The most recent V-Dem dataset is available from the [V-Dem data homepage](https://www.v-dem.net/data.html) in preconfigured `csv`, `SPSS`, and `STATA` formats, however, there is a recommended package available to R users available on GitHub. Installing the remote package from GitHub requires *devtools.* As a non-standard package (not on CRAN or Bioconductor), *vdemdata* can cause issues for certain workflows, but you can use the `demcon::get_vdem()` function to directly download the latest dataset from *vdemdata*'s GitHub repo without installing the non-standard package. 
+
+For this guide we'll be using *data.table*, but all of these steps could be performed with *dplyr* and the greater *tidyverse*, or even base R if you're a sadist. Lastly, to assist with country coding, we'll be using the *states* package.
+
+```{r install packages, eval=FALSE}
+# If you would like to install the package over GitHub.
+  devtools::install_github("vdeminstitute/vdemdata")}
+
+```
+
+After the packages are installed load *vdemdata*, *data.table*, and *states*.
+
+```{r}
+# library(vdemdata)
+library(data.table)
+library(states)
+```
+
+We'll get the dataset with `demcon::get_vdem()`.
+
+```{r}
+vdem <- demcon::get_vdem(write_out = FALSE)
+data.table::setDT(vdem)
+```
+
+## Determining Variables of Interest
+
+For the purposes of this guide we'll focus on 2 widely used high-level metrics from vdem: `v2x_libdem` and `v2x_polyarchy`. The codebook can be filtered to provide greater context.
+
+```{r}
+metrics<-c('v2x_libdem','v2x_polyarchy')
+```
+
+[The V-Dem codebook](https://www.v-dem.net/static/website/img/refs/codebookv12.pdf) reveals that these are 2 high level (`vartype==D`) democracy indices quantifying the extent of electoral (`v2x_polyarchy`) and liberal (`v2x_libdem`) democracy. Both metrics are continuous variables bound by 0-1. In addition to our desired indices, we should also subset the raw data for identification metrics such as country names, observation year, coding schemes that assist with harmonizing V-Dem data with other datasets, and indicators for country start and stop dates to manage secessions, civil wars, etc..
+
+```{r}
+id.vars<-c('country_name', 'COWcode','histname' ,'codingstart_contemp', 'codingend_contemp','year')
+vars<-c(id.vars, metrics)
+```
+
+Now we can subset the raw data and toss what we don't need.
+
+```{r}
+vdem<-vdem[, ..vars]
+```
+
+## Determining Years of Interest
+
+We'll perform a last bit of pruning for temporal considerations. V-Dem has a large historical record dating back to 1789. This is valuable data, but far greater than many practitioners or analysts require. More commonly, analyses will start just before or after key events; i.e. WWII, the Cold War, and the War on Terror. Practically speaking, when preparing historical country-year data, we are most concerned with the headaches brought on by coding nation-state secessions, independence, unifications, etc. 
+
+With this in mind, important periods to consider/avoid are: Sudan 2011, Yugoslavia/Kosovo/Serbia/Montenegro 2003-2008, Eritrea 1993, Czech/Slovakia 1993, the complicated Yugoslavian dissolution, and Cold War fallout 1989-1991. Sudan is usually an easy check, but Yugoslavia/Kosovo/Serbia/Montenegro are almost always a real pain to manage across multiple datasets and they usually must be included in the analysis. For the purpose of this guide we will subset our data to 1995 and investigate any issues associated with Yugoslavia/Kosovo/Serbia/Montenegro.
+
+```{r}
+vdem <- vdem[year>1950]
+```
+
+## Country Code Checks
+
+The most important issue to address with country-year datasets is accurate annual country codes. This includes nation-state secessions and independence (Sudan, Yugoslavia), independently listed territories (Hong Kong, Puerto Rico, Guam, French Guiana), and states with limited international recognition (Kosovo, West Bank/Palestine, Taiwan). These issues afflict international datasets in a wide variety of ways. Before you attempt to "fix" these issues, it's important to consider how they will be addressed in all the datasets required for your analysis. Do not spend copious amounts of time coding changes to Kosovo and the West Bank if they're completely ignored in your other datasets of concern.
+
+V-Dem contains Correlates of War (CoW; `COWcode`) country codes. This is a popular coding scheme that makes country-coding an easier task. We'll start be renaming the variable, because we will have to manipulate it a lot.
+
+```{r}
+names(vdem)[2]<-"cow"
+```
+
+The *states* package can serve as a reference to check Correlates of War and Gleditsch and Ward country codes. Both are embedded in the package and available with calls to `states::cowstates` or `states::gwstates`. Let's start by checking if any CoW codes are missing.
+
+```{r}
+unique(vdem[is.na(cow),country_name])
+```
+
+It may seem like the easy way out, but these states are commonly ignored in popular environment-security datasets, and can usually be dropped from analysis. One dataset where they would be included is United Nations refugee and asylum seeker data, in which case, you would have to introduce ISO codes to harmonize them with other United Nations data. This could be done with minimal trouble using the *countrycode* package, but will likely lead to other issues.
+
+```{r}
+
+library(countrycode)
+
+vdem[, iso3:=countrycode::countrycode(cow, 
+                                      origin = "cown",
+                                      destination = "iso3c")]
+
+```
+Now we go down the rabbit hole; who were matched unambiguously?
+
+```{r}
+vdem[cow %in% c(260, 265, 315, 345, 347, 511, 678, 680, 817), unique(country_name)]
+```
+
+These require hard-coded fixes to their ISO3 values. This is beyond the scope of the purpose of this vignette so we will drop the missing `cow` observations in V-Dem and move on, but I wanted to illustrate the beginning of a country code black hole.
+
+```{r}
+vdem <- vdem[!is.na(cow)][, iso3:=NULL]
+```
+
+### Yugoslavia, Serbia, Montenegro, and Kosovo
+
+Official CoW codes for Yugoslavia, Serbia, Montenegro, and Kosovo are 345, 345, 341, and 347, respectively. CoW maintains the 345 numeric AND YUG character designations for Serbia after the Yugoslavia break. CoW assigns Montenegro 341 starting in 2006 and Kosovo 347 in 2008 (review these changes in `states::cowstates`). 
+
+Check how V-Dem assigns these changes.
+
+```{r}
+dcast(vdem[cow %in% c(345, 341, 347), .(country_name, cow, year)],
+      year~cow, value.var = "country_name")
+```
+
+
+Thankfully the codes themselves are correct, however, V-Dem maintains independent listings for all three states even while they were unified under various arrangements between 1992-2006. The course of action here depends on your intended use and additional datasets. Taking the mean of Serbia and Montenegro (maybe even Kosovo) over this time period is one potential correction. For this guide, we will average Serbia and Montenegro. You may want to consider doing the same for Kosovo and Serbia or all 3 states.
+
+```{r}
+for(i in 1995:2005) vdem[cow %in% c(341,345) & year==i, (metrics):=lapply(.SD, mean, na.rm = TRUE), .SDcols = metrics]
+```
+
+The coverage and coding for Kosovo is correct; it can be left if other data of interest recognizes the state. 
+
+### Other Considerations
+
+Sudan (625) and South Sudan (626) split in 2011. Check them in V-Dem.
+
+```{r}
+dcast(vdem[cow %in% c(625,626), .(country_name, cow, year)],year~cow, value.var = "country_name")
+```
+
+This is correct.
+Lastly, we should check V-Dem against our CoW reference (`states::cowstates`) to see if V-Dem is missing any countries.
+
+```{r}
+cowstates<-data.table::setDT(states::cowstates)
+missing_in_vdem<-cowstates[end >= sprintf("%s-01-01", 1995)][!cowcode %in% vdem$cow]
+knitr::kable(missing_in_vdem)
+```
+
+There is nothing of consequence here; these are mostly microstates that are commonly omitted from environment-security analysis. For simplicity, the remaining microstates included in V-Dem may be dropped unless you are carrying out a specialized analysis.
+
+```{r}
+microstates <- cowstates[microstate==TRUE,unique(cowcode)]
+vdem<-vdem[!(cow %in% microstates)]
+```
+
+Finally, we'll examine V-Dem for duplicate country names to ensure we don't miss any peculiarities.
+
+```{r}
+dupes<-unique(vdem[,.(country_name, cow)])
+# check for duplicate names across codes
+table(duplicated(dupes$country_name))
+```
+
+Excellent!
+
+## Missing Values
+
+As previously covered, `v2x_polyarchy` and `v2x_libdem` are 2 high level (`vartype==D`) democracy indices quantifying the extent of electoral and liberal democracy in a given state. Both metrics are continuous variables bound by 0-1. We can quickly check their distributions to get a better sense of the data.
+
+```{r}
+hist.dat<-melt(vdem, 
+               id.vars = c("cow", "year"),
+               measure.vars = c("v2x_libdem",
+                                "v2x_polyarchy"),
+               variable.name = "metric",
+               value.name = "value")
+
+ggplot2::ggplot(hist.dat, ggplot2::aes(x=value))+
+  ggplot2::geom_histogram()+
+  ggplot2::facet_wrap(~metric)+
+  ggplot2::labs(title = "V-Dem Metric Distributions",
+                x = "Value",
+                y= "Count")+
+  ggplot2::theme_minimal()
+```
+
+These look pretty good with (mostly) uniform converage. The warnings have tipped us off to a few missing values; let's investigate further.
+
+```{r}
+vdem[is.na(v2x_libdem) | is.na(v2x_polyarchy),.(unique(country_name), n=.N, last_year=max(year)), by=cow]
+```
+
+There are only 11 missing values, but they should be investigated. First Timor-Leste.
+
+```{r}
+vdem[cow==860, .(country_name, year, v2x_libdem, v2x_polyarchy)]
+```
+
+They are missing `v2x_libdem` for 1995-1998. These years are during the Indonesian occupation and prior to their internationally recognized independence. They can be ignored or dropped unless you have a special use case.
+
+Now Bahrain.
+
+```{r}
+vdem[cow==692, .(country_name, year, v2x_libdem, v2x_polyarchy)]
+
+```
+
+Bahrain declared independence in 1971 and converted to a Constitutional Monarchy in 2001. The missing value in 2001 may pose an issue when trying to join on additional data sets. A simple fix would be to replace the 2001 value with the 2002 value. A more complicated fix would be some type of lead-in imputation. Let's examine the time series.
+
+```{r}
+ggplot2::ggplot(vdem[cow==692], ggplot2::aes(x=year, y=v2x_libdem))+
+  ggplot2::geom_point(size = 2)+
+  ggplot2::labs(title="Bahrain Libdem Time Series",
+                x = "Year",
+                y = "Libdem")+
+  ggplot2::theme_minimal()
+```
+
+There is a bit of a linear trend, but imputation would be more trouble than it's worth. An adequate correction is to put in the 2002 value.
+
+```{r}
+vdem[cow==692 & year==2001, v2x_libdem := vdem[cow==692 & year==2002, v2x_libdem]]
+```
+
+## Final Cleanup
+
+Before finishing, we will perform a few final processing steps. First, extract only the minimum number of variables.
+
+```{r}
+vdem <- vdem[, .(cow, year, v2x_libdem, v2x_polyarchy)]
+```
+
+Next, set the year and CoW columns to integers.
+
+```{r}
+cols<-c("cow", "year")
+vdem[, (cols):=lapply(.SD, as.integer), .SDcols = cols]
+```
+
+Lastly, if you are working with other colleagues, strip the *data.table* class from the object.
+
+```{r}
+data.table::setDF(vdem)
+```
+
+And we're finished. I hope you found this exercise informative, and please contact me with any questions, concerns, or tips.
+
+# References

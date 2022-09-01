@@ -1,0 +1,1379 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+
+
+<title>Pre-Processing the Varieties of Democracy Dataset</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+
+
+<style type="text/css">
+  code {
+    white-space: pre;
+  }
+  .sourceCode {
+    overflow: visible;
+  }
+</style>
+<style type="text/css" data-origin="pandoc">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    for (var j = 0; j < rules.length; j++) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") continue;
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') continue;
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Pre-Processing the Varieties of Democracy
+Dataset</h1>
+
+
+
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(knitr)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(kableExtra)</span></code></pre></div>
+<div id="introduction" class="section level2">
+<h2>Introduction</h2>
+<p>This guide is an entry in a series of proposed vignettes in which we
+walk through a deep cleaning or exploratory data analysis (EDA) of a
+widely employed environment-security dataset. For this entry, we will
+explore the Varieties of Democracy dataset (V-Dem; <span class="citation">(<strong>Coppedge2020?</strong>)</span>). V-Dem is a
+massive dataset that aims to provide quantitative assessments of
+historical and nation-state democracy. V-Dem provides both
+multidimensional and disaggregated measures of democracy across five
+primary principals: electoral, liberal, participatory, deliberative, and
+egalitarian <span class="citation">(<strong>Pemstein2018?</strong>)</span>. The V-Dem team
+is comprised of dozens of scientists spread across the globe working
+with thousands of local experts to quantify local and regional aspects
+of democracy.</p>
+<p>V-Dem is not alone in its efforts to quantify qualitative aspects of
+nation-state democracy, civil liberties, and elections. Similar datasets
+include Polity5 <span class="citation">(<strong>Marshall2002?</strong>)</span>, Freedom
+House’s Freedom in the World, Countries at the Crossroads, and Freedom
+of the Press <span class="citation">(<strong>FreedomHouse2014?</strong>)</span>, and the
+Institutions and Elections Project <span class="citation">(<strong>Wig2015?</strong>)</span>. Although these
+datasets are similar in many ways, V-Dem stands out with the sheer
+number of metrics included. V-Dem features over 470 indicators, 82
+indices, and 5 high-level metrics. That is an overwhelming amount of
+data on par with the World Development Indicators <span class="citation">(<strong>TheWorldBank2017?</strong>)</span>. Let’s get
+started.</p>
+<div id="acquiring-the-data" class="section level3">
+<h3>Acquiring the Data</h3>
+<p>The most recent V-Dem dataset is available from the <a href="https://www.v-dem.net/data.html">V-Dem data homepage</a> in
+preconfigured <code>csv</code>, <code>SPSS</code>, and
+<code>STATA</code> formats, however, there is a recommended package
+available to R users available on GitHub. Installing the remote package
+from GitHub requires <em>devtools.</em> As a non-standard package (not
+on CRAN or Bioconductor), <em>vdemdata</em> can cause issues for certain
+workflows, but you can use the <code>demcon::get_vdem()</code> function
+to directly download the latest dataset from <em>vdemdata</em>’s GitHub
+repo without installing the non-standard package.</p>
+<p>For this guide we’ll be using <em>data.table</em>, but all of these
+steps could be performed with <em>dplyr</em> and the greater
+<em>tidyverse</em>, or even base R if you’re a sadist. Lastly, to assist
+with country coding, we’ll be using the <em>states</em> package.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># If you would like to install the package over GitHub.</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  devtools<span class="sc">::</span><span class="fu">install_github</span>(<span class="st">&quot;vdeminstitute/vdemdata&quot;</span>)<span class="er">}</span></span></code></pre></div>
+<p>After the packages are installed load <em>vdemdata</em>,
+<em>data.table</em>, and <em>states</em>.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># library(vdemdata)</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(data.table)</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(states)</span></code></pre></div>
+<p>We’ll get the dataset with <code>demcon::get_vdem()</code>.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>vdem <span class="ot">&lt;-</span> demcon<span class="sc">::</span><span class="fu">get_vdem</span>(<span class="at">write_out =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>data.table<span class="sc">::</span><span class="fu">setDT</span>(vdem)</span></code></pre></div>
+</div>
+</div>
+<div id="determining-variables-of-interest" class="section level2">
+<h2>Determining Variables of Interest</h2>
+<p>For the purposes of this guide we’ll focus on 2 widely used
+high-level metrics from vdem: <code>v2x_libdem</code> and
+<code>v2x_polyarchy</code>. The codebook can be filtered to provide
+greater context.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>metrics<span class="ot">&lt;-</span><span class="fu">c</span>(<span class="st">&#39;v2x_libdem&#39;</span>,<span class="st">&#39;v2x_polyarchy&#39;</span>)</span></code></pre></div>
+<p><a href="https://www.v-dem.net/static/website/img/refs/codebookv12.pdf">The
+V-Dem codebook</a> reveals that these are 2 high level
+(<code>vartype==D</code>) democracy indices quantifying the extent of
+electoral (<code>v2x_polyarchy</code>) and liberal
+(<code>v2x_libdem</code>) democracy. Both metrics are continuous
+variables bound by 0-1. In addition to our desired indices, we should
+also subset the raw data for identification metrics such as country
+names, observation year, coding schemes that assist with harmonizing
+V-Dem data with other datasets, and indicators for country start and
+stop dates to manage secessions, civil wars, etc..</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>id.vars<span class="ot">&lt;-</span><span class="fu">c</span>(<span class="st">&#39;country_name&#39;</span>, <span class="st">&#39;COWcode&#39;</span>,<span class="st">&#39;histname&#39;</span> ,<span class="st">&#39;codingstart_contemp&#39;</span>, <span class="st">&#39;codingend_contemp&#39;</span>,<span class="st">&#39;year&#39;</span>)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>vars<span class="ot">&lt;-</span><span class="fu">c</span>(id.vars, metrics)</span></code></pre></div>
+<p>Now we can subset the raw data and toss what we don’t need.</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>vdem<span class="ot">&lt;-</span>vdem[, ..vars]</span></code></pre></div>
+</div>
+<div id="determining-years-of-interest" class="section level2">
+<h2>Determining Years of Interest</h2>
+<p>We’ll perform a last bit of pruning for temporal considerations.
+V-Dem has a large historical record dating back to 1789. This is
+valuable data, but far greater than many practitioners or analysts
+require. More commonly, analyses will start just before or after key
+events; i.e. WWII, the Cold War, and the War on Terror. Practically
+speaking, when preparing historical country-year data, we are most
+concerned with the headaches brought on by coding nation-state
+secessions, independence, unifications, etc.</p>
+<p>With this in mind, important periods to consider/avoid are: Sudan
+2011, Yugoslavia/Kosovo/Serbia/Montenegro 2003-2008, Eritrea 1993,
+Czech/Slovakia 1993, the complicated Yugoslavian dissolution, and Cold
+War fallout 1989-1991. Sudan is usually an easy check, but
+Yugoslavia/Kosovo/Serbia/Montenegro are almost always a real pain to
+manage across multiple datasets and they usually must be included in the
+analysis. For the purpose of this guide we will subset our data to 1995
+and investigate any issues associated with
+Yugoslavia/Kosovo/Serbia/Montenegro.</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>vdem <span class="ot">&lt;-</span> vdem[year<span class="sc">&gt;</span><span class="dv">1950</span>]</span></code></pre></div>
+</div>
+<div id="country-code-checks" class="section level2">
+<h2>Country Code Checks</h2>
+<p>The most important issue to address with country-year datasets is
+accurate annual country codes. This includes nation-state secessions and
+independence (Sudan, Yugoslavia), independently listed territories (Hong
+Kong, Puerto Rico, Guam, French Guiana), and states with limited
+international recognition (Kosovo, West Bank/Palestine, Taiwan). These
+issues afflict international datasets in a wide variety of ways. Before
+you attempt to “fix” these issues, it’s important to consider how they
+will be addressed in all the datasets required for your analysis. Do not
+spend copious amounts of time coding changes to Kosovo and the West Bank
+if they’re completely ignored in your other datasets of concern.</p>
+<p>V-Dem contains Correlates of War (CoW; <code>COWcode</code>) country
+codes. This is a popular coding scheme that makes country-coding an
+easier task. We’ll start be renaming the variable, because we will have
+to manipulate it a lot.</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(vdem)[<span class="dv">2</span>]<span class="ot">&lt;-</span><span class="st">&quot;cow&quot;</span></span></code></pre></div>
+<p>The <em>states</em> package can serve as a reference to check
+Correlates of War and Gleditsch and Ward country codes. Both are
+embedded in the package and available with calls to
+<code>states::cowstates</code> or <code>states::gwstates</code>. Let’s
+start by checking if any CoW codes are missing.</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">unique</span>(vdem[<span class="fu">is.na</span>(cow),country_name])</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] &quot;Palestine/West Bank&quot; &quot;Palestine/Gaza&quot;      &quot;Somaliland&quot;         </span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [4] &quot;Hong Kong&quot;</span></span></code></pre></div>
+<p>It may seem like the easy way out, but these states are commonly
+ignored in popular environment-security datasets, and can usually be
+dropped from analysis. One dataset where they would be included is
+United Nations refugee and asylum seeker data, in which case, you would
+have to introduce ISO codes to harmonize them with other United Nations
+data. This could be done with minimal trouble using the
+<em>countrycode</em> package, but will likely lead to other issues.</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(countrycode)</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>vdem[, iso3<span class="sc">:</span><span class="er">=</span>countrycode<span class="sc">::</span><span class="fu">countrycode</span>(cow, </span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>                                      <span class="at">origin =</span> <span class="st">&quot;cown&quot;</span>,</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>                                      <span class="at">destination =</span> <span class="st">&quot;iso3c&quot;</span>)]</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Warning in countrycode_convert(sourcevar = sourcevar, origin = origin, destination = dest, : Some values were not matched unambiguously: 260, 265, 315, 345, 347, 511, 678, 680, 817</span></span></code></pre></div>
+<p>Now we go down the rabbit hole; who were matched unambiguously?</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>vdem[cow <span class="sc">%in%</span> <span class="fu">c</span>(<span class="dv">260</span>, <span class="dv">265</span>, <span class="dv">315</span>, <span class="dv">345</span>, <span class="dv">347</span>, <span class="dv">511</span>, <span class="dv">678</span>, <span class="dv">680</span>, <span class="dv">817</span>), <span class="fu">unique</span>(country_name)]</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] &quot;Yemen&quot;                      &quot;South Yemen&quot;               </span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [3] &quot;Republic of Vietnam&quot;        &quot;Kosovo&quot;                    </span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [5] &quot;Germany&quot;                    &quot;German Democratic Republic&quot;</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [7] &quot;Czech Republic&quot;             &quot;Serbia&quot;                    </span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [9] &quot;Zanzibar&quot;</span></span></code></pre></div>
+<p>These require hard-coded fixes to their ISO3 values. This is beyond
+the scope of the purpose of this vignette so we will drop the missing
+<code>cow</code> observations in V-Dem and move on, but I wanted to
+illustrate the beginning of a country code black hole.</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>vdem <span class="ot">&lt;-</span> vdem[<span class="sc">!</span><span class="fu">is.na</span>(cow)][, iso3<span class="sc">:</span><span class="er">=</span><span class="cn">NULL</span>]</span></code></pre></div>
+<div id="yugoslavia-serbia-montenegro-and-kosovo" class="section level3">
+<h3>Yugoslavia, Serbia, Montenegro, and Kosovo</h3>
+<p>Official CoW codes for Yugoslavia, Serbia, Montenegro, and Kosovo are
+345, 345, 341, and 347, respectively. CoW maintains the 345 numeric AND
+YUG character designations for Serbia after the Yugoslavia break. CoW
+assigns Montenegro 341 starting in 2006 and Kosovo 347 in 2008 (review
+these changes in <code>states::cowstates</code>).</p>
+<p>Check how V-Dem assigns these changes.</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">dcast</span>(vdem[cow <span class="sc">%in%</span> <span class="fu">c</span>(<span class="dv">345</span>, <span class="dv">341</span>, <span class="dv">347</span>), .(country_name, cow, year)],</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>      year<span class="sc">~</span>cow, <span class="at">value.var =</span> <span class="st">&quot;country_name&quot;</span>)</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Key: &lt;year&gt;</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      year        341    345    347</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     &lt;num&gt;     &lt;char&gt; &lt;char&gt; &lt;char&gt;</span></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  1:  1951       &lt;NA&gt; Serbia   &lt;NA&gt;</span></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  2:  1952       &lt;NA&gt; Serbia   &lt;NA&gt;</span></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  3:  1953       &lt;NA&gt; Serbia   &lt;NA&gt;</span></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  4:  1954       &lt;NA&gt; Serbia   &lt;NA&gt;</span></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  5:  1955       &lt;NA&gt; Serbia   &lt;NA&gt;</span></span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  6:  1956       &lt;NA&gt; Serbia   &lt;NA&gt;</span></span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  7:  1957       &lt;NA&gt; Serbia   &lt;NA&gt;</span></span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  8:  1958       &lt;NA&gt; Serbia   &lt;NA&gt;</span></span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  9:  1959       &lt;NA&gt; Serbia   &lt;NA&gt;</span></span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 10:  1960       &lt;NA&gt; Serbia   &lt;NA&gt;</span></span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 11:  1961       &lt;NA&gt; Serbia   &lt;NA&gt;</span></span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 12:  1962       &lt;NA&gt; Serbia   &lt;NA&gt;</span></span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 13:  1963       &lt;NA&gt; Serbia   &lt;NA&gt;</span></span>
+<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 14:  1964       &lt;NA&gt; Serbia   &lt;NA&gt;</span></span>
+<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 15:  1965       &lt;NA&gt; Serbia   &lt;NA&gt;</span></span>
+<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 16:  1966       &lt;NA&gt; Serbia   &lt;NA&gt;</span></span>
+<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 17:  1967       &lt;NA&gt; Serbia   &lt;NA&gt;</span></span>
+<span id="cb14-23"><a href="#cb14-23" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 18:  1968       &lt;NA&gt; Serbia   &lt;NA&gt;</span></span>
+<span id="cb14-24"><a href="#cb14-24" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 19:  1969       &lt;NA&gt; Serbia   &lt;NA&gt;</span></span>
+<span id="cb14-25"><a href="#cb14-25" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 20:  1970       &lt;NA&gt; Serbia   &lt;NA&gt;</span></span>
+<span id="cb14-26"><a href="#cb14-26" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 21:  1971       &lt;NA&gt; Serbia   &lt;NA&gt;</span></span>
+<span id="cb14-27"><a href="#cb14-27" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 22:  1972       &lt;NA&gt; Serbia   &lt;NA&gt;</span></span>
+<span id="cb14-28"><a href="#cb14-28" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 23:  1973       &lt;NA&gt; Serbia   &lt;NA&gt;</span></span>
+<span id="cb14-29"><a href="#cb14-29" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 24:  1974       &lt;NA&gt; Serbia   &lt;NA&gt;</span></span>
+<span id="cb14-30"><a href="#cb14-30" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 25:  1975       &lt;NA&gt; Serbia   &lt;NA&gt;</span></span>
+<span id="cb14-31"><a href="#cb14-31" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 26:  1976       &lt;NA&gt; Serbia   &lt;NA&gt;</span></span>
+<span id="cb14-32"><a href="#cb14-32" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 27:  1977       &lt;NA&gt; Serbia   &lt;NA&gt;</span></span>
+<span id="cb14-33"><a href="#cb14-33" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 28:  1978       &lt;NA&gt; Serbia   &lt;NA&gt;</span></span>
+<span id="cb14-34"><a href="#cb14-34" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 29:  1979       &lt;NA&gt; Serbia   &lt;NA&gt;</span></span>
+<span id="cb14-35"><a href="#cb14-35" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 30:  1980       &lt;NA&gt; Serbia   &lt;NA&gt;</span></span>
+<span id="cb14-36"><a href="#cb14-36" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 31:  1981       &lt;NA&gt; Serbia   &lt;NA&gt;</span></span>
+<span id="cb14-37"><a href="#cb14-37" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 32:  1982       &lt;NA&gt; Serbia   &lt;NA&gt;</span></span>
+<span id="cb14-38"><a href="#cb14-38" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 33:  1983       &lt;NA&gt; Serbia   &lt;NA&gt;</span></span>
+<span id="cb14-39"><a href="#cb14-39" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 34:  1984       &lt;NA&gt; Serbia   &lt;NA&gt;</span></span>
+<span id="cb14-40"><a href="#cb14-40" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 35:  1985       &lt;NA&gt; Serbia   &lt;NA&gt;</span></span>
+<span id="cb14-41"><a href="#cb14-41" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 36:  1986       &lt;NA&gt; Serbia   &lt;NA&gt;</span></span>
+<span id="cb14-42"><a href="#cb14-42" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 37:  1987       &lt;NA&gt; Serbia   &lt;NA&gt;</span></span>
+<span id="cb14-43"><a href="#cb14-43" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 38:  1988       &lt;NA&gt; Serbia   &lt;NA&gt;</span></span>
+<span id="cb14-44"><a href="#cb14-44" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 39:  1989       &lt;NA&gt; Serbia   &lt;NA&gt;</span></span>
+<span id="cb14-45"><a href="#cb14-45" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 40:  1990       &lt;NA&gt; Serbia   &lt;NA&gt;</span></span>
+<span id="cb14-46"><a href="#cb14-46" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 41:  1991       &lt;NA&gt; Serbia   &lt;NA&gt;</span></span>
+<span id="cb14-47"><a href="#cb14-47" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 42:  1992       &lt;NA&gt; Serbia   &lt;NA&gt;</span></span>
+<span id="cb14-48"><a href="#cb14-48" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 43:  1993       &lt;NA&gt; Serbia   &lt;NA&gt;</span></span>
+<span id="cb14-49"><a href="#cb14-49" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 44:  1994       &lt;NA&gt; Serbia   &lt;NA&gt;</span></span>
+<span id="cb14-50"><a href="#cb14-50" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 45:  1995       &lt;NA&gt; Serbia   &lt;NA&gt;</span></span>
+<span id="cb14-51"><a href="#cb14-51" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 46:  1996       &lt;NA&gt; Serbia   &lt;NA&gt;</span></span>
+<span id="cb14-52"><a href="#cb14-52" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 47:  1997       &lt;NA&gt; Serbia   &lt;NA&gt;</span></span>
+<span id="cb14-53"><a href="#cb14-53" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 48:  1998 Montenegro Serbia   &lt;NA&gt;</span></span>
+<span id="cb14-54"><a href="#cb14-54" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 49:  1999 Montenegro Serbia Kosovo</span></span>
+<span id="cb14-55"><a href="#cb14-55" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 50:  2000 Montenegro Serbia Kosovo</span></span>
+<span id="cb14-56"><a href="#cb14-56" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 51:  2001 Montenegro Serbia Kosovo</span></span>
+<span id="cb14-57"><a href="#cb14-57" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 52:  2002 Montenegro Serbia Kosovo</span></span>
+<span id="cb14-58"><a href="#cb14-58" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 53:  2003 Montenegro Serbia Kosovo</span></span>
+<span id="cb14-59"><a href="#cb14-59" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 54:  2004 Montenegro Serbia Kosovo</span></span>
+<span id="cb14-60"><a href="#cb14-60" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 55:  2005 Montenegro Serbia Kosovo</span></span>
+<span id="cb14-61"><a href="#cb14-61" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 56:  2006 Montenegro Serbia Kosovo</span></span>
+<span id="cb14-62"><a href="#cb14-62" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 57:  2007 Montenegro Serbia Kosovo</span></span>
+<span id="cb14-63"><a href="#cb14-63" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 58:  2008 Montenegro Serbia Kosovo</span></span>
+<span id="cb14-64"><a href="#cb14-64" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 59:  2009 Montenegro Serbia Kosovo</span></span>
+<span id="cb14-65"><a href="#cb14-65" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 60:  2010 Montenegro Serbia Kosovo</span></span>
+<span id="cb14-66"><a href="#cb14-66" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 61:  2011 Montenegro Serbia Kosovo</span></span>
+<span id="cb14-67"><a href="#cb14-67" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 62:  2012 Montenegro Serbia Kosovo</span></span>
+<span id="cb14-68"><a href="#cb14-68" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 63:  2013 Montenegro Serbia Kosovo</span></span>
+<span id="cb14-69"><a href="#cb14-69" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 64:  2014 Montenegro Serbia Kosovo</span></span>
+<span id="cb14-70"><a href="#cb14-70" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 65:  2015 Montenegro Serbia Kosovo</span></span>
+<span id="cb14-71"><a href="#cb14-71" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 66:  2016 Montenegro Serbia Kosovo</span></span>
+<span id="cb14-72"><a href="#cb14-72" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 67:  2017 Montenegro Serbia Kosovo</span></span>
+<span id="cb14-73"><a href="#cb14-73" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 68:  2018 Montenegro Serbia Kosovo</span></span>
+<span id="cb14-74"><a href="#cb14-74" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 69:  2019 Montenegro Serbia Kosovo</span></span>
+<span id="cb14-75"><a href="#cb14-75" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 70:  2020 Montenegro Serbia Kosovo</span></span>
+<span id="cb14-76"><a href="#cb14-76" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 71:  2021 Montenegro Serbia Kosovo</span></span>
+<span id="cb14-77"><a href="#cb14-77" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      year        341    345    347</span></span></code></pre></div>
+<p>Thankfully the codes themselves are correct, however, V-Dem maintains
+independent listings for all three states even while they were unified
+under various arrangements between 1992-2006. The course of action here
+depends on your intended use and additional datasets. Taking the mean of
+Serbia and Montenegro (maybe even Kosovo) over this time period is one
+potential correction. For this guide, we will average Serbia and
+Montenegro. You may want to consider doing the same for Kosovo and
+Serbia or all 3 states.</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1995</span><span class="sc">:</span><span class="dv">2005</span>) vdem[cow <span class="sc">%in%</span> <span class="fu">c</span>(<span class="dv">341</span>,<span class="dv">345</span>) <span class="sc">&amp;</span> year<span class="sc">==</span>i, (metrics)<span class="sc">:</span><span class="er">=</span><span class="fu">lapply</span>(.SD, mean, <span class="at">na.rm =</span> <span class="cn">TRUE</span>), .SDcols <span class="ot">=</span> metrics]</span></code></pre></div>
+<p>The coverage and coding for Kosovo is correct; it can be left if
+other data of interest recognizes the state.</p>
+</div>
+<div id="other-considerations" class="section level3">
+<h3>Other Considerations</h3>
+<p>Sudan (625) and South Sudan (626) split in 2011. Check them in
+V-Dem.</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">dcast</span>(vdem[cow <span class="sc">%in%</span> <span class="fu">c</span>(<span class="dv">625</span>,<span class="dv">626</span>), .(country_name, cow, year)],year<span class="sc">~</span>cow, <span class="at">value.var =</span> <span class="st">&quot;country_name&quot;</span>)</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Key: &lt;year&gt;</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      year    625         626</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     &lt;num&gt; &lt;char&gt;      &lt;char&gt;</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  1:  1951  Sudan        &lt;NA&gt;</span></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  2:  1952  Sudan        &lt;NA&gt;</span></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  3:  1953  Sudan        &lt;NA&gt;</span></span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  4:  1954  Sudan        &lt;NA&gt;</span></span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  5:  1955  Sudan        &lt;NA&gt;</span></span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  6:  1956  Sudan        &lt;NA&gt;</span></span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  7:  1957  Sudan        &lt;NA&gt;</span></span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  8:  1958  Sudan        &lt;NA&gt;</span></span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  9:  1959  Sudan        &lt;NA&gt;</span></span>
+<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 10:  1960  Sudan        &lt;NA&gt;</span></span>
+<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 11:  1961  Sudan        &lt;NA&gt;</span></span>
+<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 12:  1962  Sudan        &lt;NA&gt;</span></span>
+<span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 13:  1963  Sudan        &lt;NA&gt;</span></span>
+<span id="cb16-18"><a href="#cb16-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 14:  1964  Sudan        &lt;NA&gt;</span></span>
+<span id="cb16-19"><a href="#cb16-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 15:  1965  Sudan        &lt;NA&gt;</span></span>
+<span id="cb16-20"><a href="#cb16-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 16:  1966  Sudan        &lt;NA&gt;</span></span>
+<span id="cb16-21"><a href="#cb16-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 17:  1967  Sudan        &lt;NA&gt;</span></span>
+<span id="cb16-22"><a href="#cb16-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 18:  1968  Sudan        &lt;NA&gt;</span></span>
+<span id="cb16-23"><a href="#cb16-23" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 19:  1969  Sudan        &lt;NA&gt;</span></span>
+<span id="cb16-24"><a href="#cb16-24" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 20:  1970  Sudan        &lt;NA&gt;</span></span>
+<span id="cb16-25"><a href="#cb16-25" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 21:  1971  Sudan        &lt;NA&gt;</span></span>
+<span id="cb16-26"><a href="#cb16-26" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 22:  1972  Sudan        &lt;NA&gt;</span></span>
+<span id="cb16-27"><a href="#cb16-27" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 23:  1973  Sudan        &lt;NA&gt;</span></span>
+<span id="cb16-28"><a href="#cb16-28" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 24:  1974  Sudan        &lt;NA&gt;</span></span>
+<span id="cb16-29"><a href="#cb16-29" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 25:  1975  Sudan        &lt;NA&gt;</span></span>
+<span id="cb16-30"><a href="#cb16-30" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 26:  1976  Sudan        &lt;NA&gt;</span></span>
+<span id="cb16-31"><a href="#cb16-31" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 27:  1977  Sudan        &lt;NA&gt;</span></span>
+<span id="cb16-32"><a href="#cb16-32" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 28:  1978  Sudan        &lt;NA&gt;</span></span>
+<span id="cb16-33"><a href="#cb16-33" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 29:  1979  Sudan        &lt;NA&gt;</span></span>
+<span id="cb16-34"><a href="#cb16-34" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 30:  1980  Sudan        &lt;NA&gt;</span></span>
+<span id="cb16-35"><a href="#cb16-35" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 31:  1981  Sudan        &lt;NA&gt;</span></span>
+<span id="cb16-36"><a href="#cb16-36" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 32:  1982  Sudan        &lt;NA&gt;</span></span>
+<span id="cb16-37"><a href="#cb16-37" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 33:  1983  Sudan        &lt;NA&gt;</span></span>
+<span id="cb16-38"><a href="#cb16-38" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 34:  1984  Sudan        &lt;NA&gt;</span></span>
+<span id="cb16-39"><a href="#cb16-39" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 35:  1985  Sudan        &lt;NA&gt;</span></span>
+<span id="cb16-40"><a href="#cb16-40" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 36:  1986  Sudan        &lt;NA&gt;</span></span>
+<span id="cb16-41"><a href="#cb16-41" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 37:  1987  Sudan        &lt;NA&gt;</span></span>
+<span id="cb16-42"><a href="#cb16-42" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 38:  1988  Sudan        &lt;NA&gt;</span></span>
+<span id="cb16-43"><a href="#cb16-43" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 39:  1989  Sudan        &lt;NA&gt;</span></span>
+<span id="cb16-44"><a href="#cb16-44" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 40:  1990  Sudan        &lt;NA&gt;</span></span>
+<span id="cb16-45"><a href="#cb16-45" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 41:  1991  Sudan        &lt;NA&gt;</span></span>
+<span id="cb16-46"><a href="#cb16-46" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 42:  1992  Sudan        &lt;NA&gt;</span></span>
+<span id="cb16-47"><a href="#cb16-47" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 43:  1993  Sudan        &lt;NA&gt;</span></span>
+<span id="cb16-48"><a href="#cb16-48" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 44:  1994  Sudan        &lt;NA&gt;</span></span>
+<span id="cb16-49"><a href="#cb16-49" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 45:  1995  Sudan        &lt;NA&gt;</span></span>
+<span id="cb16-50"><a href="#cb16-50" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 46:  1996  Sudan        &lt;NA&gt;</span></span>
+<span id="cb16-51"><a href="#cb16-51" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 47:  1997  Sudan        &lt;NA&gt;</span></span>
+<span id="cb16-52"><a href="#cb16-52" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 48:  1998  Sudan        &lt;NA&gt;</span></span>
+<span id="cb16-53"><a href="#cb16-53" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 49:  1999  Sudan        &lt;NA&gt;</span></span>
+<span id="cb16-54"><a href="#cb16-54" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 50:  2000  Sudan        &lt;NA&gt;</span></span>
+<span id="cb16-55"><a href="#cb16-55" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 51:  2001  Sudan        &lt;NA&gt;</span></span>
+<span id="cb16-56"><a href="#cb16-56" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 52:  2002  Sudan        &lt;NA&gt;</span></span>
+<span id="cb16-57"><a href="#cb16-57" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 53:  2003  Sudan        &lt;NA&gt;</span></span>
+<span id="cb16-58"><a href="#cb16-58" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 54:  2004  Sudan        &lt;NA&gt;</span></span>
+<span id="cb16-59"><a href="#cb16-59" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 55:  2005  Sudan        &lt;NA&gt;</span></span>
+<span id="cb16-60"><a href="#cb16-60" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 56:  2006  Sudan        &lt;NA&gt;</span></span>
+<span id="cb16-61"><a href="#cb16-61" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 57:  2007  Sudan        &lt;NA&gt;</span></span>
+<span id="cb16-62"><a href="#cb16-62" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 58:  2008  Sudan        &lt;NA&gt;</span></span>
+<span id="cb16-63"><a href="#cb16-63" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 59:  2009  Sudan        &lt;NA&gt;</span></span>
+<span id="cb16-64"><a href="#cb16-64" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 60:  2010  Sudan        &lt;NA&gt;</span></span>
+<span id="cb16-65"><a href="#cb16-65" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 61:  2011  Sudan South Sudan</span></span>
+<span id="cb16-66"><a href="#cb16-66" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 62:  2012  Sudan South Sudan</span></span>
+<span id="cb16-67"><a href="#cb16-67" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 63:  2013  Sudan South Sudan</span></span>
+<span id="cb16-68"><a href="#cb16-68" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 64:  2014  Sudan South Sudan</span></span>
+<span id="cb16-69"><a href="#cb16-69" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 65:  2015  Sudan South Sudan</span></span>
+<span id="cb16-70"><a href="#cb16-70" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 66:  2016  Sudan South Sudan</span></span>
+<span id="cb16-71"><a href="#cb16-71" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 67:  2017  Sudan South Sudan</span></span>
+<span id="cb16-72"><a href="#cb16-72" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 68:  2018  Sudan South Sudan</span></span>
+<span id="cb16-73"><a href="#cb16-73" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 69:  2019  Sudan South Sudan</span></span>
+<span id="cb16-74"><a href="#cb16-74" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 70:  2020  Sudan South Sudan</span></span>
+<span id="cb16-75"><a href="#cb16-75" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 71:  2021  Sudan South Sudan</span></span>
+<span id="cb16-76"><a href="#cb16-76" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      year    625         626</span></span></code></pre></div>
+<p>This is correct. Lastly, we should check V-Dem against our CoW
+reference (<code>states::cowstates</code>) to see if V-Dem is missing
+any countries.</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>cowstates<span class="ot">&lt;-</span>data.table<span class="sc">::</span><span class="fu">setDT</span>(states<span class="sc">::</span>cowstates)</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>missing_in_vdem<span class="ot">&lt;-</span>cowstates[end <span class="sc">&gt;=</span> <span class="fu">sprintf</span>(<span class="st">&quot;%s-01-01&quot;</span>, <span class="dv">1995</span>)][<span class="sc">!</span>cowcode <span class="sc">%in%</span> vdem<span class="sc">$</span>cow]</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(missing_in_vdem)</span></code></pre></div>
+<table>
+<thead>
+<tr>
+<th style="text-align:right;">
+cowcode
+</th>
+<th style="text-align:left;">
+cowc
+</th>
+<th style="text-align:left;">
+country_name
+</th>
+<th style="text-align:left;">
+start
+</th>
+<th style="text-align:left;">
+end
+</th>
+<th style="text-align:left;">
+microstate
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:right;">
+31
+</td>
+<td style="text-align:left;">
+BHM
+</td>
+<td style="text-align:left;">
+Bahamas
+</td>
+<td style="text-align:left;">
+1973-07-10
+</td>
+<td style="text-align:left;">
+9999-12-31
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+54
+</td>
+<td style="text-align:left;">
+DMA
+</td>
+<td style="text-align:left;">
+Dominica
+</td>
+<td style="text-align:left;">
+1978-11-03
+</td>
+<td style="text-align:left;">
+9999-12-31
+</td>
+<td style="text-align:left;">
+TRUE
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+55
+</td>
+<td style="text-align:left;">
+GRN
+</td>
+<td style="text-align:left;">
+Grenada
+</td>
+<td style="text-align:left;">
+1974-02-07
+</td>
+<td style="text-align:left;">
+9999-12-31
+</td>
+<td style="text-align:left;">
+TRUE
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+56
+</td>
+<td style="text-align:left;">
+SLU
+</td>
+<td style="text-align:left;">
+St. Lucia
+</td>
+<td style="text-align:left;">
+1979-02-22
+</td>
+<td style="text-align:left;">
+9999-12-31
+</td>
+<td style="text-align:left;">
+TRUE
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+57
+</td>
+<td style="text-align:left;">
+SVG
+</td>
+<td style="text-align:left;">
+St. Vincent and the Grenadines
+</td>
+<td style="text-align:left;">
+1979-10-27
+</td>
+<td style="text-align:left;">
+9999-12-31
+</td>
+<td style="text-align:left;">
+TRUE
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+58
+</td>
+<td style="text-align:left;">
+AAB
+</td>
+<td style="text-align:left;">
+Antigua &amp; Barbuda
+</td>
+<td style="text-align:left;">
+1981-11-01
+</td>
+<td style="text-align:left;">
+9999-12-31
+</td>
+<td style="text-align:left;">
+TRUE
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+60
+</td>
+<td style="text-align:left;">
+SKN
+</td>
+<td style="text-align:left;">
+St. Kitts and Nevis
+</td>
+<td style="text-align:left;">
+1983-09-19
+</td>
+<td style="text-align:left;">
+9999-12-31
+</td>
+<td style="text-align:left;">
+TRUE
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+80
+</td>
+<td style="text-align:left;">
+BLZ
+</td>
+<td style="text-align:left;">
+Belize
+</td>
+<td style="text-align:left;">
+1981-09-21
+</td>
+<td style="text-align:left;">
+9999-12-31
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+221
+</td>
+<td style="text-align:left;">
+MNC
+</td>
+<td style="text-align:left;">
+Monaco
+</td>
+<td style="text-align:left;">
+1993-05-28
+</td>
+<td style="text-align:left;">
+9999-12-31
+</td>
+<td style="text-align:left;">
+TRUE
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+223
+</td>
+<td style="text-align:left;">
+LIE
+</td>
+<td style="text-align:left;">
+Liechtenstein
+</td>
+<td style="text-align:left;">
+1990-09-18
+</td>
+<td style="text-align:left;">
+9999-12-31
+</td>
+<td style="text-align:left;">
+TRUE
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+232
+</td>
+<td style="text-align:left;">
+AND
+</td>
+<td style="text-align:left;">
+Andorra
+</td>
+<td style="text-align:left;">
+1993-07-28
+</td>
+<td style="text-align:left;">
+9999-12-31
+</td>
+<td style="text-align:left;">
+TRUE
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+331
+</td>
+<td style="text-align:left;">
+SNM
+</td>
+<td style="text-align:left;">
+San Marino
+</td>
+<td style="text-align:left;">
+1992-03-02
+</td>
+<td style="text-align:left;">
+9999-12-31
+</td>
+<td style="text-align:left;">
+TRUE
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+835
+</td>
+<td style="text-align:left;">
+BRU
+</td>
+<td style="text-align:left;">
+Brunei
+</td>
+<td style="text-align:left;">
+1984-01-01
+</td>
+<td style="text-align:left;">
+9999-12-31
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+946
+</td>
+<td style="text-align:left;">
+KIR
+</td>
+<td style="text-align:left;">
+Kiribati
+</td>
+<td style="text-align:left;">
+1999-09-14
+</td>
+<td style="text-align:left;">
+9999-12-31
+</td>
+<td style="text-align:left;">
+TRUE
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+947
+</td>
+<td style="text-align:left;">
+TUV
+</td>
+<td style="text-align:left;">
+Tuvalu
+</td>
+<td style="text-align:left;">
+2000-09-05
+</td>
+<td style="text-align:left;">
+9999-12-31
+</td>
+<td style="text-align:left;">
+TRUE
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+955
+</td>
+<td style="text-align:left;">
+TON
+</td>
+<td style="text-align:left;">
+Tonga
+</td>
+<td style="text-align:left;">
+1999-09-14
+</td>
+<td style="text-align:left;">
+9999-12-31
+</td>
+<td style="text-align:left;">
+TRUE
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+970
+</td>
+<td style="text-align:left;">
+NAU
+</td>
+<td style="text-align:left;">
+Nauru
+</td>
+<td style="text-align:left;">
+1999-09-14
+</td>
+<td style="text-align:left;">
+9999-12-31
+</td>
+<td style="text-align:left;">
+TRUE
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+983
+</td>
+<td style="text-align:left;">
+MSI
+</td>
+<td style="text-align:left;">
+Marshall Islands
+</td>
+<td style="text-align:left;">
+1991-09-17
+</td>
+<td style="text-align:left;">
+9999-12-31
+</td>
+<td style="text-align:left;">
+TRUE
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+986
+</td>
+<td style="text-align:left;">
+PAL
+</td>
+<td style="text-align:left;">
+Palau
+</td>
+<td style="text-align:left;">
+1994-12-15
+</td>
+<td style="text-align:left;">
+9999-12-31
+</td>
+<td style="text-align:left;">
+TRUE
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+987
+</td>
+<td style="text-align:left;">
+FSM
+</td>
+<td style="text-align:left;">
+Federated States of Micronesia
+</td>
+<td style="text-align:left;">
+1991-09-17
+</td>
+<td style="text-align:left;">
+9999-12-31
+</td>
+<td style="text-align:left;">
+TRUE
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+990
+</td>
+<td style="text-align:left;">
+WSM
+</td>
+<td style="text-align:left;">
+Samoa
+</td>
+<td style="text-align:left;">
+1976-12-15
+</td>
+<td style="text-align:left;">
+9999-12-31
+</td>
+<td style="text-align:left;">
+TRUE
+</td>
+</tr>
+</tbody>
+</table>
+<p>There is nothing of consequence here; these are mostly microstates
+that are commonly omitted from environment-security analysis. For
+simplicity, the remaining microstates included in V-Dem may be dropped
+unless you are carrying out a specialized analysis.</p>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>microstates <span class="ot">&lt;-</span> cowstates[microstate<span class="sc">==</span><span class="cn">TRUE</span>,<span class="fu">unique</span>(cowcode)]</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>vdem<span class="ot">&lt;-</span>vdem[<span class="sc">!</span>(cow <span class="sc">%in%</span> microstates)]</span></code></pre></div>
+<p>Finally, we’ll examine V-Dem for duplicate country names to ensure we
+don’t miss any peculiarities.</p>
+<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>dupes<span class="ot">&lt;-</span><span class="fu">unique</span>(vdem[,.(country_name, cow)])</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="co"># check for duplicate names across codes</span></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(<span class="fu">duplicated</span>(dupes<span class="sc">$</span>country_name))</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; FALSE  TRUE </span></span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   175     3</span></span></code></pre></div>
+<p>Excellent!</p>
+</div>
+</div>
+<div id="missing-values" class="section level2">
+<h2>Missing Values</h2>
+<p>As previously covered, <code>v2x_polyarchy</code> and
+<code>v2x_libdem</code> are 2 high level (<code>vartype==D</code>)
+democracy indices quantifying the extent of electoral and liberal
+democracy in a given state. Both metrics are continuous variables bound
+by 0-1. We can quickly check their distributions to get a better sense
+of the data.</p>
+<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>hist.dat<span class="ot">&lt;-</span><span class="fu">melt</span>(vdem, </span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>               <span class="at">id.vars =</span> <span class="fu">c</span>(<span class="st">&quot;cow&quot;</span>, <span class="st">&quot;year&quot;</span>),</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>               <span class="at">measure.vars =</span> <span class="fu">c</span>(<span class="st">&quot;v2x_libdem&quot;</span>,</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>                                <span class="st">&quot;v2x_polyarchy&quot;</span>),</span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>               <span class="at">variable.name =</span> <span class="st">&quot;metric&quot;</span>,</span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>               <span class="at">value.name =</span> <span class="st">&quot;value&quot;</span>)</span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>ggplot2<span class="sc">::</span><span class="fu">ggplot</span>(hist.dat, ggplot2<span class="sc">::</span><span class="fu">aes</span>(<span class="at">x=</span>value))<span class="sc">+</span></span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>  ggplot2<span class="sc">::</span><span class="fu">geom_histogram</span>()<span class="sc">+</span></span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>  ggplot2<span class="sc">::</span><span class="fu">facet_wrap</span>(<span class="sc">~</span>metric)<span class="sc">+</span></span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a>  ggplot2<span class="sc">::</span><span class="fu">labs</span>(<span class="at">title =</span> <span class="st">&quot;V-Dem Metric Distributions&quot;</span>,</span>
+<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a>                <span class="at">x =</span> <span class="st">&quot;Value&quot;</span>,</span>
+<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a>                <span class="at">y=</span> <span class="st">&quot;Count&quot;</span>)<span class="sc">+</span></span>
+<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a>  ggplot2<span class="sc">::</span><span class="fu">theme_minimal</span>()</span>
+<span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</span></span>
+<span id="cb20-16"><a href="#cb20-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Warning: Removed 106 rows containing non-finite values (stat_bin).</span></span></code></pre></div>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
+<p>These look pretty good with (mostly) uniform converage. The warnings
+have tipped us off to a few missing values; let’s investigate
+further.</p>
+<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>vdem[<span class="fu">is.na</span>(v2x_libdem) <span class="sc">|</span> <span class="fu">is.na</span>(v2x_polyarchy),.(<span class="fu">unique</span>(country_name), <span class="at">n=</span>.N, <span class="at">last_year=</span><span class="fu">max</span>(year)), by<span class="ot">=</span>cow]</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      cow                       V1     n last_year</span></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    &lt;num&gt;                   &lt;char&gt; &lt;int&gt;     &lt;num&gt;</span></span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1:   482 Central African Republic     2      1965</span></span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2:   860              Timor-Leste    48      1998</span></span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3:   705               Kazakhstan     1      1990</span></span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4:   565                  Namibia     1      1979</span></span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5:   701             Turkmenistan     1      1990</span></span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6:   692                  Bahrain    51      2001</span></span></code></pre></div>
+<p>There are only 11 missing values, but they should be investigated.
+First Timor-Leste.</p>
+<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>vdem[cow<span class="sc">==</span><span class="dv">860</span>, .(country_name, year, v2x_libdem, v2x_polyarchy)]</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     country_name  year v2x_libdem v2x_polyarchy</span></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;           &lt;char&gt; &lt;num&gt;      &lt;num&gt;         &lt;num&gt;</span></span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  1:  Timor-Leste  1951         NA         0.016</span></span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  2:  Timor-Leste  1952         NA         0.016</span></span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  3:  Timor-Leste  1953         NA         0.016</span></span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  4:  Timor-Leste  1954         NA         0.016</span></span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  5:  Timor-Leste  1955         NA         0.016</span></span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  6:  Timor-Leste  1956         NA         0.016</span></span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  7:  Timor-Leste  1957         NA         0.016</span></span>
+<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  8:  Timor-Leste  1958         NA         0.016</span></span>
+<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  9:  Timor-Leste  1959         NA         0.016</span></span>
+<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 10:  Timor-Leste  1960         NA         0.017</span></span>
+<span id="cb22-14"><a href="#cb22-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 11:  Timor-Leste  1961         NA         0.017</span></span>
+<span id="cb22-15"><a href="#cb22-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 12:  Timor-Leste  1962         NA         0.017</span></span>
+<span id="cb22-16"><a href="#cb22-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 13:  Timor-Leste  1963         NA         0.017</span></span>
+<span id="cb22-17"><a href="#cb22-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 14:  Timor-Leste  1964         NA         0.017</span></span>
+<span id="cb22-18"><a href="#cb22-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 15:  Timor-Leste  1965         NA         0.017</span></span>
+<span id="cb22-19"><a href="#cb22-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 16:  Timor-Leste  1966         NA         0.017</span></span>
+<span id="cb22-20"><a href="#cb22-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 17:  Timor-Leste  1967         NA         0.017</span></span>
+<span id="cb22-21"><a href="#cb22-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 18:  Timor-Leste  1968         NA         0.017</span></span>
+<span id="cb22-22"><a href="#cb22-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 19:  Timor-Leste  1969         NA         0.017</span></span>
+<span id="cb22-23"><a href="#cb22-23" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 20:  Timor-Leste  1970         NA         0.017</span></span>
+<span id="cb22-24"><a href="#cb22-24" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 21:  Timor-Leste  1971         NA         0.017</span></span>
+<span id="cb22-25"><a href="#cb22-25" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 22:  Timor-Leste  1972         NA         0.017</span></span>
+<span id="cb22-26"><a href="#cb22-26" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 23:  Timor-Leste  1973         NA         0.047</span></span>
+<span id="cb22-27"><a href="#cb22-27" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 24:  Timor-Leste  1974         NA         0.049</span></span>
+<span id="cb22-28"><a href="#cb22-28" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 25:  Timor-Leste  1975         NA         0.069</span></span>
+<span id="cb22-29"><a href="#cb22-29" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 26:  Timor-Leste  1976         NA         0.021</span></span>
+<span id="cb22-30"><a href="#cb22-30" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 27:  Timor-Leste  1977         NA         0.076</span></span>
+<span id="cb22-31"><a href="#cb22-31" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 28:  Timor-Leste  1978         NA         0.076</span></span>
+<span id="cb22-32"><a href="#cb22-32" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 29:  Timor-Leste  1979         NA         0.076</span></span>
+<span id="cb22-33"><a href="#cb22-33" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 30:  Timor-Leste  1980         NA         0.076</span></span>
+<span id="cb22-34"><a href="#cb22-34" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 31:  Timor-Leste  1981         NA         0.076</span></span>
+<span id="cb22-35"><a href="#cb22-35" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 32:  Timor-Leste  1982         NA         0.076</span></span>
+<span id="cb22-36"><a href="#cb22-36" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 33:  Timor-Leste  1983         NA         0.076</span></span>
+<span id="cb22-37"><a href="#cb22-37" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 34:  Timor-Leste  1984         NA         0.076</span></span>
+<span id="cb22-38"><a href="#cb22-38" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 35:  Timor-Leste  1985         NA         0.076</span></span>
+<span id="cb22-39"><a href="#cb22-39" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 36:  Timor-Leste  1986         NA         0.076</span></span>
+<span id="cb22-40"><a href="#cb22-40" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 37:  Timor-Leste  1987         NA         0.076</span></span>
+<span id="cb22-41"><a href="#cb22-41" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 38:  Timor-Leste  1988         NA         0.076</span></span>
+<span id="cb22-42"><a href="#cb22-42" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 39:  Timor-Leste  1989         NA         0.076</span></span>
+<span id="cb22-43"><a href="#cb22-43" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 40:  Timor-Leste  1990         NA         0.078</span></span>
+<span id="cb22-44"><a href="#cb22-44" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 41:  Timor-Leste  1991         NA         0.078</span></span>
+<span id="cb22-45"><a href="#cb22-45" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 42:  Timor-Leste  1992         NA         0.078</span></span>
+<span id="cb22-46"><a href="#cb22-46" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 43:  Timor-Leste  1993         NA         0.078</span></span>
+<span id="cb22-47"><a href="#cb22-47" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 44:  Timor-Leste  1994         NA         0.078</span></span>
+<span id="cb22-48"><a href="#cb22-48" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 45:  Timor-Leste  1995         NA         0.078</span></span>
+<span id="cb22-49"><a href="#cb22-49" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 46:  Timor-Leste  1996         NA         0.078</span></span>
+<span id="cb22-50"><a href="#cb22-50" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 47:  Timor-Leste  1997         NA         0.078</span></span>
+<span id="cb22-51"><a href="#cb22-51" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 48:  Timor-Leste  1998         NA         0.090</span></span>
+<span id="cb22-52"><a href="#cb22-52" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 49:  Timor-Leste  1999      0.087         0.090</span></span>
+<span id="cb22-53"><a href="#cb22-53" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 50:  Timor-Leste  2000      0.186         0.225</span></span>
+<span id="cb22-54"><a href="#cb22-54" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 51:  Timor-Leste  2001      0.237         0.293</span></span>
+<span id="cb22-55"><a href="#cb22-55" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 52:  Timor-Leste  2002      0.384         0.503</span></span>
+<span id="cb22-56"><a href="#cb22-56" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 53:  Timor-Leste  2003      0.414         0.568</span></span>
+<span id="cb22-57"><a href="#cb22-57" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 54:  Timor-Leste  2004      0.414         0.568</span></span>
+<span id="cb22-58"><a href="#cb22-58" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 55:  Timor-Leste  2005      0.416         0.576</span></span>
+<span id="cb22-59"><a href="#cb22-59" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 56:  Timor-Leste  2006      0.414         0.575</span></span>
+<span id="cb22-60"><a href="#cb22-60" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 57:  Timor-Leste  2007      0.471         0.616</span></span>
+<span id="cb22-61"><a href="#cb22-61" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 58:  Timor-Leste  2008      0.477         0.627</span></span>
+<span id="cb22-62"><a href="#cb22-62" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 59:  Timor-Leste  2009      0.482         0.632</span></span>
+<span id="cb22-63"><a href="#cb22-63" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 60:  Timor-Leste  2010      0.488         0.633</span></span>
+<span id="cb22-64"><a href="#cb22-64" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 61:  Timor-Leste  2011      0.488         0.633</span></span>
+<span id="cb22-65"><a href="#cb22-65" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 62:  Timor-Leste  2012      0.498         0.644</span></span>
+<span id="cb22-66"><a href="#cb22-66" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 63:  Timor-Leste  2013      0.501         0.648</span></span>
+<span id="cb22-67"><a href="#cb22-67" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 64:  Timor-Leste  2014      0.474         0.632</span></span>
+<span id="cb22-68"><a href="#cb22-68" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 65:  Timor-Leste  2015      0.461         0.632</span></span>
+<span id="cb22-69"><a href="#cb22-69" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 66:  Timor-Leste  2016      0.454         0.615</span></span>
+<span id="cb22-70"><a href="#cb22-70" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 67:  Timor-Leste  2017      0.471         0.648</span></span>
+<span id="cb22-71"><a href="#cb22-71" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 68:  Timor-Leste  2018      0.492         0.674</span></span>
+<span id="cb22-72"><a href="#cb22-72" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 69:  Timor-Leste  2019      0.508         0.684</span></span>
+<span id="cb22-73"><a href="#cb22-73" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 70:  Timor-Leste  2020      0.480         0.664</span></span>
+<span id="cb22-74"><a href="#cb22-74" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 71:  Timor-Leste  2021      0.487         0.680</span></span>
+<span id="cb22-75"><a href="#cb22-75" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     country_name  year v2x_libdem v2x_polyarchy</span></span></code></pre></div>
+<p>They are missing <code>v2x_libdem</code> for 1995-1998. These years
+are during the Indonesian occupation and prior to their internationally
+recognized independence. They can be ignored or dropped unless you have
+a special use case.</p>
+<p>Now Bahrain.</p>
+<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>vdem[cow<span class="sc">==</span><span class="dv">692</span>, .(country_name, year, v2x_libdem, v2x_polyarchy)]</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     country_name  year v2x_libdem v2x_polyarchy</span></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;           &lt;char&gt; &lt;num&gt;      &lt;num&gt;         &lt;num&gt;</span></span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  1:      Bahrain  1951         NA         0.023</span></span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  2:      Bahrain  1952         NA         0.023</span></span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  3:      Bahrain  1953         NA         0.026</span></span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  4:      Bahrain  1954         NA         0.026</span></span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  5:      Bahrain  1955         NA         0.026</span></span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  6:      Bahrain  1956         NA         0.026</span></span>
+<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  7:      Bahrain  1957         NA         0.025</span></span>
+<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  8:      Bahrain  1958         NA         0.025</span></span>
+<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  9:      Bahrain  1959         NA         0.025</span></span>
+<span id="cb23-13"><a href="#cb23-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 10:      Bahrain  1960         NA         0.023</span></span>
+<span id="cb23-14"><a href="#cb23-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 11:      Bahrain  1961         NA         0.024</span></span>
+<span id="cb23-15"><a href="#cb23-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 12:      Bahrain  1962         NA         0.024</span></span>
+<span id="cb23-16"><a href="#cb23-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 13:      Bahrain  1963         NA         0.024</span></span>
+<span id="cb23-17"><a href="#cb23-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 14:      Bahrain  1964         NA         0.024</span></span>
+<span id="cb23-18"><a href="#cb23-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 15:      Bahrain  1965         NA         0.024</span></span>
+<span id="cb23-19"><a href="#cb23-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 16:      Bahrain  1966         NA         0.024</span></span>
+<span id="cb23-20"><a href="#cb23-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 17:      Bahrain  1967         NA         0.024</span></span>
+<span id="cb23-21"><a href="#cb23-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 18:      Bahrain  1968         NA         0.024</span></span>
+<span id="cb23-22"><a href="#cb23-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 19:      Bahrain  1969         NA         0.024</span></span>
+<span id="cb23-23"><a href="#cb23-23" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 20:      Bahrain  1970         NA         0.024</span></span>
+<span id="cb23-24"><a href="#cb23-24" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 21:      Bahrain  1971         NA         0.026</span></span>
+<span id="cb23-25"><a href="#cb23-25" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 22:      Bahrain  1972         NA         0.076</span></span>
+<span id="cb23-26"><a href="#cb23-26" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 23:      Bahrain  1973         NA         0.150</span></span>
+<span id="cb23-27"><a href="#cb23-27" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 24:      Bahrain  1974         NA         0.126</span></span>
+<span id="cb23-28"><a href="#cb23-28" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 25:      Bahrain  1975         NA         0.105</span></span>
+<span id="cb23-29"><a href="#cb23-29" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 26:      Bahrain  1976         NA         0.051</span></span>
+<span id="cb23-30"><a href="#cb23-30" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 27:      Bahrain  1977         NA         0.051</span></span>
+<span id="cb23-31"><a href="#cb23-31" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 28:      Bahrain  1978         NA         0.051</span></span>
+<span id="cb23-32"><a href="#cb23-32" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 29:      Bahrain  1979         NA         0.051</span></span>
+<span id="cb23-33"><a href="#cb23-33" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 30:      Bahrain  1980         NA         0.049</span></span>
+<span id="cb23-34"><a href="#cb23-34" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 31:      Bahrain  1981         NA         0.049</span></span>
+<span id="cb23-35"><a href="#cb23-35" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 32:      Bahrain  1982         NA         0.049</span></span>
+<span id="cb23-36"><a href="#cb23-36" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 33:      Bahrain  1983         NA         0.049</span></span>
+<span id="cb23-37"><a href="#cb23-37" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 34:      Bahrain  1984         NA         0.049</span></span>
+<span id="cb23-38"><a href="#cb23-38" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 35:      Bahrain  1985         NA         0.049</span></span>
+<span id="cb23-39"><a href="#cb23-39" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 36:      Bahrain  1986         NA         0.049</span></span>
+<span id="cb23-40"><a href="#cb23-40" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 37:      Bahrain  1987         NA         0.049</span></span>
+<span id="cb23-41"><a href="#cb23-41" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 38:      Bahrain  1988         NA         0.049</span></span>
+<span id="cb23-42"><a href="#cb23-42" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 39:      Bahrain  1989         NA         0.049</span></span>
+<span id="cb23-43"><a href="#cb23-43" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 40:      Bahrain  1990         NA         0.049</span></span>
+<span id="cb23-44"><a href="#cb23-44" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 41:      Bahrain  1991         NA         0.049</span></span>
+<span id="cb23-45"><a href="#cb23-45" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 42:      Bahrain  1992         NA         0.049</span></span>
+<span id="cb23-46"><a href="#cb23-46" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 43:      Bahrain  1993         NA         0.049</span></span>
+<span id="cb23-47"><a href="#cb23-47" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 44:      Bahrain  1994         NA         0.049</span></span>
+<span id="cb23-48"><a href="#cb23-48" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 45:      Bahrain  1995         NA         0.049</span></span>
+<span id="cb23-49"><a href="#cb23-49" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 46:      Bahrain  1996         NA         0.049</span></span>
+<span id="cb23-50"><a href="#cb23-50" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 47:      Bahrain  1997         NA         0.049</span></span>
+<span id="cb23-51"><a href="#cb23-51" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 48:      Bahrain  1998         NA         0.049</span></span>
+<span id="cb23-52"><a href="#cb23-52" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 49:      Bahrain  1999         NA         0.049</span></span>
+<span id="cb23-53"><a href="#cb23-53" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 50:      Bahrain  2000         NA         0.067</span></span>
+<span id="cb23-54"><a href="#cb23-54" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 51:      Bahrain  2001         NA         0.113</span></span>
+<span id="cb23-55"><a href="#cb23-55" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 52:      Bahrain  2002      0.071         0.147</span></span>
+<span id="cb23-56"><a href="#cb23-56" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 53:      Bahrain  2003      0.085         0.216</span></span>
+<span id="cb23-57"><a href="#cb23-57" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 54:      Bahrain  2004      0.081         0.216</span></span>
+<span id="cb23-58"><a href="#cb23-58" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 55:      Bahrain  2005      0.082         0.225</span></span>
+<span id="cb23-59"><a href="#cb23-59" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 56:      Bahrain  2006      0.089         0.230</span></span>
+<span id="cb23-60"><a href="#cb23-60" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 57:      Bahrain  2007      0.088         0.232</span></span>
+<span id="cb23-61"><a href="#cb23-61" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 58:      Bahrain  2008      0.088         0.232</span></span>
+<span id="cb23-62"><a href="#cb23-62" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 59:      Bahrain  2009      0.087         0.230</span></span>
+<span id="cb23-63"><a href="#cb23-63" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 60:      Bahrain  2010      0.084         0.227</span></span>
+<span id="cb23-64"><a href="#cb23-64" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 61:      Bahrain  2011      0.052         0.184</span></span>
+<span id="cb23-65"><a href="#cb23-65" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 62:      Bahrain  2012      0.045         0.166</span></span>
+<span id="cb23-66"><a href="#cb23-66" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 63:      Bahrain  2013      0.046         0.164</span></span>
+<span id="cb23-67"><a href="#cb23-67" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 64:      Bahrain  2014      0.047         0.162</span></span>
+<span id="cb23-68"><a href="#cb23-68" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 65:      Bahrain  2015      0.045         0.138</span></span>
+<span id="cb23-69"><a href="#cb23-69" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 66:      Bahrain  2016      0.045         0.131</span></span>
+<span id="cb23-70"><a href="#cb23-70" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 67:      Bahrain  2017      0.043         0.126</span></span>
+<span id="cb23-71"><a href="#cb23-71" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 68:      Bahrain  2018      0.042         0.121</span></span>
+<span id="cb23-72"><a href="#cb23-72" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 69:      Bahrain  2019      0.048         0.118</span></span>
+<span id="cb23-73"><a href="#cb23-73" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 70:      Bahrain  2020      0.048         0.118</span></span>
+<span id="cb23-74"><a href="#cb23-74" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 71:      Bahrain  2021      0.052         0.122</span></span>
+<span id="cb23-75"><a href="#cb23-75" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     country_name  year v2x_libdem v2x_polyarchy</span></span></code></pre></div>
+<p>Bahrain declared independence in 1971 and converted to a
+Constitutional Monarchy in 2001. The missing value in 2001 may pose an
+issue when trying to join on additional data sets. A simple fix would be
+to replace the 2001 value with the 2002 value. A more complicated fix
+would be some type of lead-in imputation. Let’s examine the time
+series.</p>
+<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>ggplot2<span class="sc">::</span><span class="fu">ggplot</span>(vdem[cow<span class="sc">==</span><span class="dv">692</span>], ggplot2<span class="sc">::</span><span class="fu">aes</span>(<span class="at">x=</span>year, <span class="at">y=</span>v2x_libdem))<span class="sc">+</span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>  ggplot2<span class="sc">::</span><span class="fu">geom_point</span>(<span class="at">size =</span> <span class="dv">2</span>)<span class="sc">+</span></span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>  ggplot2<span class="sc">::</span><span class="fu">labs</span>(<span class="at">title=</span><span class="st">&quot;Bahrain Libdem Time Series&quot;</span>,</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>                <span class="at">x =</span> <span class="st">&quot;Year&quot;</span>,</span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>                <span class="at">y =</span> <span class="st">&quot;Libdem&quot;</span>)<span class="sc">+</span></span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>  ggplot2<span class="sc">::</span><span class="fu">theme_minimal</span>()</span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Warning: Removed 51 rows containing missing values (geom_point).</span></span></code></pre></div>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
+<p>There is a bit of a linear trend, but imputation would be more
+trouble than it’s worth. An adequate correction is to put in the 2002
+value.</p>
+<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>vdem[cow<span class="sc">==</span><span class="dv">692</span> <span class="sc">&amp;</span> year<span class="sc">==</span><span class="dv">2001</span>, v2x_libdem <span class="sc">:</span><span class="er">=</span> vdem[cow<span class="sc">==</span><span class="dv">692</span> <span class="sc">&amp;</span> year<span class="sc">==</span><span class="dv">2002</span>, v2x_libdem]]</span></code></pre></div>
+</div>
+<div id="final-cleanup" class="section level2">
+<h2>Final Cleanup</h2>
+<p>Before finishing, we will perform a few final processing steps.
+First, extract only the minimum number of variables.</p>
+<div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>vdem <span class="ot">&lt;-</span> vdem[, .(cow, year, v2x_libdem, v2x_polyarchy)]</span></code></pre></div>
+<p>Next, set the year and CoW columns to integers.</p>
+<div class="sourceCode" id="cb27"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>cols<span class="ot">&lt;-</span><span class="fu">c</span>(<span class="st">&quot;cow&quot;</span>, <span class="st">&quot;year&quot;</span>)</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>vdem[, (cols)<span class="sc">:</span><span class="er">=</span><span class="fu">lapply</span>(.SD, as.integer), .SDcols <span class="ot">=</span> cols]</span></code></pre></div>
+<p>Lastly, if you are working with other colleagues, strip the
+<em>data.table</em> class from the object.</p>
+<div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>data.table<span class="sc">::</span><span class="fu">setDF</span>(vdem)</span></code></pre></div>
+<p>And we’re finished. I hope you found this exercise informative, and
+please contact me with any questions, concerns, or tips.</p>
+</div>
+<div id="references" class="section level1">
+<h1>References</h1>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

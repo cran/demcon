@@ -1,0 +1,382 @@
+---
+title: "Country Coding Considerations for Dataset Harmonization and Applied Uses"
+output: rmarkdown::html_vignette
+authors: 
+  - Joshua Brinks
+date: April 13, 2021
+bibliography: "civil-liberties.bib"
+vignette: >
+  %\VignetteIndexEntry{Country Coding Considerations for Dataset Harmonization and Applied Uses}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+library(magrittr)
+```
+
+
+## Introduction
+
+Managing country codes is one of the most difficult tasks in environment-security analysis, and each dataset treats the concept differently. Country code designations may be very strict and only respect internationally recognized sovereign nations starting with their first official day of independence. Other datasets may include separate observations and codes for territories, disputed states, colonial nations, and other quasi-independent states. Coding systems like the Correlates of War [@CorrelatesofWarProject2017] or Gleditsch and Ward [@Gleditsch1999] fall into the former with strict, to the day, international recognition, while refugee and asylum datasets provided by the United Nations [@UnitedNations2017] falls into the latter. UN migration and refugee datasets include nearly every conceivable territorial designation/disaggregation (e.g. Puerto Rico, Taiwan, Faroe Islands, etc.).
+
+When using an individual dataset, users need a general awareness for the conceptual approach to the country code specification and any potential inconsistencies, however, when attempting to harmonize multiple datasets, more intricate knowledge is required. Merging multiple datasets without first addressing disparate approaches to country coding will lead to inconsistencies, numerous `NA` values, and compound downstream error in the analysis. It takes time and experience to anticipate country coding issues and know what to be on the lookout for when undergoing project planning. The goal of this vignette is to outline common issues and considerations for harmonizing multiple country-year datasets. This walkthrough uses the Varieties of Democracy (V-Dem) [@Coppedge2020] and Correlates of War coding schemes to illustrate recurrent challenges. They are good datasets to work with while learning for several reasons:
+
+  * They represent opposite ends of the country-coding ideological spectrum.
+    + Because V-Dem is focused on polities, it is highly disaggregated and observes long standing claims of independence.
+    + Conversely, CoW is very strict and adheres to official and internationally recognized claims of independence.
+  * Both datasets are consistent and have little to no errors and inconsistencies. This is helpful for learning, but not entirely representative of real world experiences. On top of differences in coding ideologies, many datasets have a slew of errors and inconsistent applications that further complicate pre-processing.
+  * They both have direct programmatic access via R that makes management, exploration, and visualization easier.
+    + The *vdemdata* package [@V-DemInstitute2020].
+    + The *states* package [@Beger2020] featuring CoW and G&W code access and manipulation.
+    + The *cshapes* package [@Weidmann2010; @Weidmann2016]; vectorized historic state boundaries using either the CoW or G&W schemes.
+  * V-Dem provides reference materials that are extremely helpful for learners.
+    + The Country Coding Manual and Historic Name column in the raw data provide a lot of context for the year to year regime changes, and their reasoning for important decisions.
+  
+
+## V-Dem Country Codes
+
+The Varieties of Democracy (V-Dem) presents a collection of highly disaggregated indicators (400+) depicting wide-ranging measures of democracy and institutional characteristics dating back to 1789. In contrast to several other political, social, and environmental datasets, V-Dem demonstrates an extreme level of transparency in their methods and copious documentation. This includes a dedicated supplementary manual depicting their country coding approach; V-Dem Country Coding Units v11.1  [@Coppedge2021]. This tutorial will highlight the most relevant (in my opinion) portions of their approach and country-year coding decisions.
+
+V-Dem defines a country as 
+
+>...a political unit enjoying at least some degree of functional and/or formal sovereignty. 
+
+Generally speaking, V-Dem will have a country-year observation for a country if:
+
+1. The state made a formal declaration of independence; even if not yet fully recognized by the international community.
+2. In modern times this concerns states like Kosovo, Taiwan, and Western Sahel, in historic times this concerns states such as Colonial Asia and Africa. 
+3. If the state in question operates with some degree of autonomy that distinguishes itself, at least in its polities and institutions, from the parent nation. 
+
+In my limited experience with V-Dem, this conceptual approach is carried out very consistently, but additional pre-processing is required to successfully merge with more strict datasets. Moreover, the Country Coding Units Manual contains information that helps users construct historical time series of nations that have limited independent observations in the dataset. For example, Bangladesh is coded independently starting in 1971, but to construct a longer historic record, the Country Coding Units Manual states that the following combination of observations may be used:
+
+1. India (Princely state of British India (1910 – 1947))
+2. Pakistan (1947 - 1971)
+3. Bangladesh (1971 - ) 
+
+The Country Coding Units Manual is a great reference if you need to combine historical democracy indicators for nations with intermittent internationally recognized sovereignty  with other historically disaggregated environmental, migration, or conflict data.
+
+The `histname` variable in the raw V-Dem dataset is also an excellent source of context for the true nature of regime changes in annual polity. While the `country_name` field is static and typically reflects the modern, common, country name in the V-Dem dataset, the `histname` reflects official or historic names and potential states of occupation. Take Somalia for example:
+
+```{r echo=FALSE}
+vdem <- demcon::get_vdem()
+data.table::setDT(vdem)
+
+somalia<-vdem[country_name=="Somalia", .(Start=min(year), End=max(year)), by=.(country_name,histname,COWcode)]
+
+somalia %>% 
+  kableExtra::kbl(caption = "V-Dem country name, V-Dem historic designation, Correlates of War country code, and start and end years for Somalia in the raw V-Dem Version 11.1 dataset.") %>%
+  kableExtra::kable_styling(bootstrap_options = c("striped", "hover", position = 'center'))
+```
+
+This provides a clear understanding of Somalia's historical sovereignty and polity for the past 120 years. When combined with the Country Coding Units Manual, the user is able to make more informative choices regarding their research interests. It also serves as excellent reference material for historical nation-states that is much faster than being sucked into a Wikipedia black hole.
+
+Now we will walk through some of the more important country coding considerations for applied cases using Varieties of Democracy and Correlates of War for 1900-2020.
+
+## The Americas
+
+### Canada
+
+  * CoW codes Canada starting in 1920 with recognition of the League of Nations.
+  * V-Dem codes Canada back to 1841.
+
+### The Caribbean 
+
+Most of the Caribbean nations are coded by CoW starting with their official independence from the colonial parent nations; usually some time between 1962-1975. V-Dem starts most Caribbean countries between 1789-1900.
+
+### Central and South America
+
+The remaining nations of Central and South America are similarly coded by  CoW and V-Dem because they mostly achieved their independence prior to 1900.
+
+## Europe
+
+### The Balkans
+
+The Balkans are consistently a source of frustration when attempting to merge disparate datasets. The affected states include Serbia/Yugoslavia, Bosnia and Herzegovina, Kosovo, Croatia, North Macedonia, Slovenia, and Montenegro. V-Dem disaggregates each component for as long as possible while CoW uses the official, internationally recognized, aggregated states. 
+Because of this, when merging with most datasets, V-Dem will require some additional processing. At a minimum this may include averaging across multiple states to calculate Yugoslavia or the State Union of Serbia and Montenegro. Given time and resources, users may also consider calculating weighted averages using population data as not to give Kosovo or Slovenia equal weighting with Serbia/Yugoslavia or Montenegro. The V-Dem Country Coding manual is very helpful in reconstructing the complicated historic record of these nation-states. 
+
+  * Montenegro 
+    + V-Dem (1789-1918; 1998-2019)
+    + CoW (2006- )
+  * Macedonia 
+    + V-Dem (1991- )
+    + CoW (1993-)
+  * Croatia
+    + V-Dem (1941-1945 Nazi puppet state, 1991-)
+    + CoW (1992-)
+  * Yugoslavia / Serbia
+    + V-Dem (1804-)
+    + CoW (1878-) no observations for 1942-1943. CoW maintains the YUG character code during the State Union of Serbia and Montenegro (2003-2006) and Republic of Serbia (2006-).
+  * Bosnia and Herzegovina 
+    + V-Dem (1992-)
+    + CoW (1992-)
+  * Kosovo
+    + V-Dem (1999-)
+    + CoW (2008-)
+  * Slovenia
+    + V-Dem (1989-)
+    + CoW (1992-)
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, fig.height=9, fig.width=6, fig.align='center', fig.cap="Visual timeline of significant secessions from the former Yugoslavian state as internationally recognized and coded by the Correlates of War and cshapes project. The top panel depicts Yugoslavia (highlighted teal) in its 1989 unified state. Highlighted countries in remaining panels illustrate countries that gained sovereignty since the previous date."}
+ steps <- data.table::data.table(
+   dates = c(
+     as.Date("1989-1-1"),
+     as.Date("1992-5-1"),
+     as.Date("1993-5-1"),
+     as.Date("2006-7-1"),
+     as.Date("2008-3-1")
+   ),
+   cow_codes = c(list(c(345)),
+                 list(c(344, 346, 349)),
+                      list(c(343)),
+                           list(c(341)),
+                                list(c(347)))
+ )
+
+ bb<-c(xmin=13,ymin=40,xmax=24,ymax=47)
+ balkans<-list()
+
+ for(i in 1:dim(steps)[1]){
+
+  cshp<-cshapes::cshp(date=steps$dates[i], useGW = FALSE)
+  cshp<-sf::st_make_valid(cshp)
+  cshp<-sf::st_crop(cshp, bb)
+  labels<-data.table::data.table(country_name=as.character(cshp$country_name),
+                                 sf::st_coordinates(sf::st_point_on_surface(cshp)))
+  new_shps<-cshp[cshp$cowcode %in% steps$cow_codes[[i]],]
+  cshp<-cshp[!(cshp$cowcode %in% steps$cow_codes[[i]]),]
+  bbox<-sf::st_bbox(cshp)
+
+   balkans[[as.character(steps$dates[[i]])]]<-
+     ggplot2::ggplot() +
+     ggplot2::geom_sf(data=cshp, fill = "#F5F5F5") +
+     ggplot2::geom_sf(data=new_shps, fill="#00dada") +
+     ggplot2::coord_sf(xlim = c(bb[1], bb[3]),
+                       ylim = c(bb[2], bb[4]),
+                       expand = FALSE)+
+     ggplot2::scale_x_continuous(breaks = seq(bb[1], bb[3], by = 2)) +
+     ggplot2::scale_y_continuous(breaks = seq(bb[2], bb[4], by = 2)) +
+     ggrepel::geom_text_repel(
+       data=labels,
+       ggplot2::aes(X, Y, label = country_name),
+       min.segment.length = 5,
+       seed = 1,
+       force = 1,
+       force_pull = 2,
+       size = 3,
+       xlim = c(NA, Inf),
+       ylim = c(-Inf, Inf))+
+     ggplot2::labs(x="",
+                   y="",
+                   title = as.character(lubridate::year(steps$dates[i])))+
+     ggplot2::theme(
+       plot.title = ggplot2::element_text(hjust = 0.5),
+       panel.grid.major = ggplot2::element_line(
+       color = gray(0.5),
+       linetype = "dashed",
+       size = 0.5),
+       panel.background = ggplot2::element_rect(fill = "aliceblue"))
+
+ }
+
+ ggplot2::ggplot() +
+   ggplot2::coord_equal(xlim = c(0, 6), ylim = c(0, 9), expand = FALSE) +
+   ggplot2::annotation_custom(ggplot2::ggplotGrob(balkans$`1989-01-01`),
+                              xmin = 1.25, xmax = 4.75, ymin = 5.25, ymax = 9) +
+   ggplot2::annotation_custom(ggplot2::ggplotGrob(balkans$`1992-05-01`),
+                              xmin = 0, xmax = 3, ymin = 2.5, ymax = 6) +
+   ggplot2::annotation_custom(ggplot2::ggplotGrob(balkans$`1993-05-01`),
+                              xmin = 3, xmax = 6, ymin = 2.5, ymax = 6) +
+   ggplot2::annotation_custom(ggplot2::ggplotGrob(balkans$`2006-07-01`),
+                              xmin = 0, xmax = 3, ymin = 0, ymax = 3) +
+   ggplot2::annotation_custom(ggplot2::ggplotGrob(balkans$`2008-03-01`),
+                              xmin = 3, xmax = 6, ymin = 0, ymax = 3)+
+   ggplot2::theme_void()
+```
+
+  
+### Austria and Hungary
+
+V-Dem codes Austria and Hungary separately throughout their entire record. Therefore there is no corresponding record for CoW numeric code 300 (Austria-Hungary 1816-1918). The user must create this designation. 
+
+### Germany
+
+Germany consists of 3 separate designations in both datasets.
+
+  * Germany (CoW 255): This is modern day and pre-WWII "unified" Germany.
+    + CoW tracks Germany 1816-1945; 1990-
+    + V-Dem tracks Germany 1789-1944; 1991-
+  * West Germany (CoW 260): Post-WWII West Germany or the German Federal Republic.
+    + CoW tracks West Germany 1955-1990
+    + V-Dem tracks West Germany 1949-1990
+  * East Germany (CoW 265): Post-WWII East Germany or the German Democratic Republic.
+    + CoW tracks East Germany 1954-1990
+    + V-Dem tracks East Germany 1945-1990 (including 1945-1948 Third Reich Occupied by Russia)
+    
+Lastly, as a result of these various configurations, CoW does not track any form of Germany during 1946-1953, and V-Dem does not contain "Unified" or West German observations from 1945-1948.
+
+### Czechoslovakia, Czech Republic, and Slovak
+
+CoW includes designations for Czechoslovakia (315; 1918-1992), Czech Republic (316; 1993-), and Slovakia (317; 1993-), whereas V-Dem observes Czechoslovakia and the Czech Republic on a single code (157; 1918-) with Slovakia (201) diverging from 1939-1945 and again permanently in 1993. 
+
+  * CoW has no Czechoslovakia observations under German Occupation (1940-1944)
+  * V-Dem has Czechoslovakia observations from 1939-1944 with a historical designation for German occupation.
+  * V-Dem includes Slovak observations for 1939-1944, when they seceded and essentially behaved as a Nazi puppet state.
+  
+### Former Soviet Union
+
+Former members of the Soviet Union are handled similarly between both datasets. Due to the centralized control over polity and institutions on part of the USSR during this time, V-Dem does not code members independently (compared to colonial Africa or Caribbean). The exceptions are nations with a historical presence prior to annexation/occupation (Lithuania, Latvia, Uzbekistan, etc.). In these cases states are recorded independently from their pre WWI or WWII independence, and then again following the dissolution of the USSR; 1990 (V-Dem) or 1991 (CoW).
+  
+### Remaining Notables
+
+The remaining notable European countries are Poland, Ireland, and Luxembourg.
+
+  * Poland
+    + CoW records Poland from 1918-1939 and 1945-
+    + V-Dem tracks Poland from 1789-1938 and 1944-
+    + Both include gaps for WWII occupation
+  * Ireland
+    + V-Dem includes starting with their declaration 1919-
+    + CoW starts with official independence 1922-
+  * Luxembourg
+    + V-Dem 1815-
+    + CoW 1920-
+
+## Middle East and North Africa
+
+### Palestine
+
+Along with the various configurations of Yugoslavia, Palestine is another consistent source of frustration when carrying out pre-processing. Many datasets and coding schemes do not recognize Palestine. In fact, CoW does not include a code for Palestine. This complicates interdisciplinary research, because including Palestine in your analysis can severely limit the number of additional datasets you can include without introducing more error through imputation or other fixes. V-Dem includes 3 separate designations for Palestine:
+
+  * Palestinian designations in V-Dem
+    + Palestine/British Mandate (209): 1918-1948
+    + Palestine/Gaza (138): 1948-1967 and 2007-. This is present day Gaza controlled by Hamas, and not influenced by Israel 
+    + Palestine/West Bank (128): 1948-1950 and 1967-. Starting with 2007, this refers to West Bank only (Gaza is coded separately when Hamas gains control in 2007).
+    
+### Yemen(s)
+
+CoW includes separate codes for the Yemen Arab Republic/North Yemen (678; 1926-1990), unified modern Yemen (679; 1990-), and Yemen People's Democratic Republic/South Yemen (680; 1967-). 
+
+Similar to the Czech Republic, V-Dem tracks historic, North, and modern Yemen on a single code (14; 1789-1850 and 1918-). They provide South Yemen a separate code (23; 1900-1990). V-Dem's greater historic record for South Yemen includes only the city of Aden and its immediate surroundings from 1900-1963. There is no CoW equivalent for South Yemen/Aden during this time. 
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, fig.width=7.5, fig.height=4, fig.align='center', fig.cap="Visual timeline of internationally recognized sovereign borders of Yemen, North Yemen, and South Yemen. Historic boundaries are determined by the cshapes packages. Note that cshapes does not include land area that lacks international independence. Hence, in the 1946 (left) panel, British Aden (South Yemen) and Djibouti are not present until they've gained their respective independence."}
+steps <- data.table::data.table(
+   dates = c(
+     as.Date("1946-10-01"),
+     as.Date("1967-12-1"),
+     as.Date("1990-6-1")
+   ),
+   cow_codes = c(list(c(678)),
+                 list(c(680)),
+                 list(c(679)))
+ )
+ 
+ bb<-c(xmin=40,ymin=9,xmax=55,ymax=22)
+ yemens<-list()
+
+ for(i in 1:dim(steps)[1]){
+   
+  cshp<-cshapes::cshp(date=steps$dates[i], useGW = FALSE)
+  cshp<-sf::st_make_valid(cshp)
+  cshp<-sf::st_crop(cshp, bb)
+  labels<-data.table::data.table(country_name=as.character(cshp$country_name),
+                                 sf::st_coordinates(sf::st_point_on_surface(cshp)))
+  new_shps<-cshp[cshp$cowcode %in% steps$cow_codes[[i]],]
+  cshp<-cshp[!(cshp$cowcode %in% steps$cow_codes[[i]]),]
+  bbox<-sf::st_bbox(cshp)
+   
+   yemens[[as.character(steps$dates[[i]])]]<-
+     ggplot2::ggplot() +
+     ggplot2::geom_sf(data=cshp, fill = "#F5F5F5") +
+     ggplot2::geom_sf(data=new_shps, fill="#00dada") +
+     ggplot2::coord_sf(xlim = c(bb[1], bb[3]),
+                       ylim = c(bb[2], bb[4]),
+                       expand = FALSE)+
+     ggplot2::scale_x_continuous(breaks = seq(bb[1], bb[3], by = 3)) +
+     ggplot2::scale_y_continuous(breaks = seq(bb[2], bb[4], by = 3)) +
+     ggrepel::geom_text_repel(
+       data=labels,
+       ggplot2::aes(X, Y, label = country_name),
+       min.segment.length = 5,
+       seed = 1,
+       force = 1,
+       force_pull = 2,
+       size = 3,
+       xlim = c(NA, Inf),
+       ylim = c(-Inf, Inf))+
+     ggplot2::labs(x="",
+                   y="",
+                   title = as.character(lubridate::year(steps$dates[i])))+
+     ggplot2::theme(
+       plot.title = ggplot2::element_text(hjust = 0.5),
+       panel.grid.major = ggplot2::element_line(
+         color = gray(0.5),
+         linetype = "dashed",
+         size = 0.5),
+       # plot.margin=grid::unit(c(-10,0,-10,0), "mm"),
+       panel.background = ggplot2::element_rect(fill = "aliceblue"))
+   
+ }
+ 
+ ggplot2::ggplot() +
+   ggplot2::coord_equal(xlim = c(0, 9), ylim = c(0, 3), expand = FALSE) +
+   ggplot2::annotation_custom(ggplot2::ggplotGrob(yemens$`1946-10-01`),
+                              xmin = 0, xmax = 3, ymin = 0, ymax = 3) +
+   ggplot2::annotation_custom(ggplot2::ggplotGrob(yemens$`1967-12-01`),
+                              xmin = 3, xmax = 6, ymin = 0, ymax = 3) +
+   ggplot2::annotation_custom(ggplot2::ggplotGrob(yemens$`1990-06-01`),
+                              xmin = 6, xmax = 9, ymin = 0, ymax = 3) +
+   ggplot2::theme_void()
+```
+
+
+## Non-MENA Africa
+
+There are not many complicated distinctions throughout Africa. V-Dem codes most African nations independently starting in 1900 while indicating their colonial protectorate. Depending on the colonial parent nation, most African countries acquired internationally recognized independence between 1955-1975; this is when the CoW record begins. Some notable African countries:
+
+  * Somaliland 
+    + Recognized by V-Dem as an independent state from 1900-1960 and again starting in 1991-. 
+    + CoW (and several other datasets) does not include Somaliland.
+  * Ethiopia
+    + Coded continuously by V-Dem starting in 1789; including Italian occupation from 1936-1941.
+    + Coded intermittently by CoW (1898-1936; 1941-); excludes Italian occupation.
+  * Sudan and South Sudan
+    + They are coded identically by V-Dem and CoW; a separate code for South Sudan starting in 2011.
+
+## Asia
+
+V-Dem includes a greater historical record for most Asian countries, because, similar to Africa and the Caribbean, there was less centralized control exercised over their polities and institutions during colonial rule. As a result, most Asian states are recorded in V-Dem beginning sometime 1789-1900, and in CoW during one of the waves of colonial (1945-1950) or regional (1971-1975) independence. However, there are a few nation-states with more complicated records in V-Dem and CoW:
+
+### Korea(s)
+
+CoW tracks Korea on 3 separate numeric codes: Korea (Unified; 730), North Korea (731), and South Korea (732). Conversely, V-Dem assigns a single code for historic/unified Korea and South Korea (42) while placing North Korea on its own code (41). CoW does not list Korea while under Soviet, USA, or Japanese occupation
+
+  * Korea (Unified)
+    + CoW (730):  1887-1905
+    + V-Dem (42): Listed as South Korea 1789-
+  * North Korea
+    + CoW (731): 1948-
+    + V-Dem (42): 1945-
+  * South Korea
+    + CoW (732): 1949-
+    + V-Dem (42): Shared code with Unified Korea 1789-1944; South Korea only 1945-
+
+### Vietnam
+
+Similar to Korea(s), V-Dem places historic, unified, Vietnam and post WWII South Vietnam on a single code. North Vietnam is recognized in 1945 and then absorbs the former South Vietnam in 1976 carrying on to the present. CoW does not recognize colonial or occupied Vietnam(s). 
+
+  * Historic Vietnam
+    + V-Dem (35): 1802-1975; Includes only South Vietnam from 1945-1975.
+    + CoW: Not recognized as a unified state.
+  * North Vietnam
+    + V-Dem (34): 1945-; Includes former South Vietnam from 1976-.
+    + CoW (816): 1954-
+  * South Vietnam
+    + V-Dem (35): 1802-1975; Includes only South Vietnam from 1945-1975.
+    + CoW (817): 1954-
+    
+## References

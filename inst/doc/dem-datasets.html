@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+
+<meta name="date" content="2021-04-13" />
+
+<title>A Brief Review of Democratic and Authoritarian Datasets</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+
+
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">A Brief Review of Democratic and
+Authoritarian Datasets</h1>
+<h4 class="date">April 13, 2021</h4>
+
+
+
+<p>Researchers and practitioners of the natural scientists are blessed
+with the ability to directly observe several measures of interest, but
+social and political scientists are cursed with the un-observable; the
+latent variable. Data products measuring civil liberties and levels of
+national democracy and authoritarianism have become a core component of
+social and political science. Comparative measures of democracy and
+civil liberties at the extremes is simple; France is clearly more
+democratic than North Korea. Comparing slight deviations across
+like-minded countries is more nuanced. Is Canada more democratic than
+Norway? Conversely, is Yemen more authoritarian than Chad. How do these
+relationships change over time, and what are effective ways to quantify
+inherently qualitative concepts of freedom, civil liberties, and
+governance?</p>
+<p>Multiple datasets attempt to answer these questions. Some of the most
+widely used include <a href="https://www.v-dem.net/">Varieties of
+Democracy</a> <span class="citation">(<strong>Coppedge2020?</strong>)</span>, Freedom
+House’s <a href="https://freedomhouse.org/report/freedom-world">Freedom
+in the World</a> <span class="citation">(<strong>FreedomHouse2021?</strong>)</span>, the
+Economist Intelligence Unit’s <a href="https://www.eiu.com/n/campaigns/democracy-index-2021/">Democracy
+Index</a> <span class="citation">(<strong>EconomistIntelligenceUnit2020?</strong>)</span>,
+and <a href="https://www.systemicpeace.org/polityproject.html">Polity
+V</a> <span class="citation">(<strong>Marshall2020?</strong>)</span>.
+Although all the aforementioned datasets grapple with similar concepts,
+they vary in their transparency of methods, level of aggregation,
+temporal coverage, frequency of updates, and irregular data availability
+across countries and time. Moreover, their <em>definitions</em> of
+democracy and civil liberties may differ greatly <span class="citation">(<strong>Cheibub2010?</strong>)</span>. The primary
+disadvantage of all of these indices is a reliance on subjective
+judgments by teams of experts, which may be exacerbated by vague
+questions and inconsistent coding between team members <span class="citation">(<strong>Cheibub2010?</strong>;
+<strong>Michalik2015?</strong>; <strong>Wig2015?</strong>)</span> . When
+combined with a lack of transparency in methods, assessing uncertainty
+and making informed comparisons across datasets becomes increasingly
+difficult.</p>
+<p>Freedom House’s Freedom in the World offers a moderate temporal
+record (1972-) and somewhat disaggregated indicators of specific forms
+of civil liberties such as the electoral process, government
+functionality, and rights to assembly. The limited number of indicators
+constituting their primary composite indices of Civil Liberties and
+Political Rights make navigating the raw data an easier process, but the
+components are very abstract and they lack transparency for certain
+methodologies, which makes interpretation difficult. Similarly, the
+Polity V dataset also presents a moderately disaggregated approach to
+their dataset, but the concepts are also very abstract. The primary
+composite indices for both datasets employ ordinal scoring systems that
+span a 13 (Freedom House) and 21 (Polity V) point scale. This allows
+users to make more granular distinctions between levels of democracy
+across a set of nation-states when compared to datasets that rely on
+binary flags for autocracies, dictatorships, or democracies. That said,
+Polity V and Freedom House have some level of obfuscation in their
+methodologies and do not provide internal measures of inter-coder
+reliability. Analysis of the correlation between Freedom House’s and
+Polity V’s two primary metrics shows a high level of correlation (0.88)
+between the 2 datasets <span class="citation">(<strong>Coppedge2017?</strong>)</span>. Despite high
+correlation, Casper and Tufis (2003) <span class="citation">(<strong>Casper2003?</strong>)</span> reported large
+shifts in statistical significance when substituting key metrics from
+Polity, Polyarchy <span class="citation">(<strong>Vanhanen2000?</strong>)</span>, and Freedom
+House indices. Högström et al. (2013) <span class="citation">(<strong>Hogstrom2013?</strong>)</span> found similar
+results comparing statistical significance and variable effects when
+exchanging Polity and Freedom House indices. These studies are 10-20
+years old at this point, but users should proceed with caution.</p>
+<div class="figure">
+<img src="data:image/png;base64,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" alt />
+<p class="caption">Global map of Varieties of Democracy’s 2021
+‘v2x_lbdem’ composite metric. Raw V-Dem data is tabular, but depicted
+here using a choropleth.</p>
+</div>
+<p>In contrast with Polity V and Freedom House’s Freedom in the World,
+the Economist Intelligence Unit’s Democracy Index presents a more
+disaggregated approach to assessing global democracy. The Democracy
+Index consists of 60 indicators across 5 categories that measure
+pluralism, civil liberties, and political culture. These indicators are
+used to rank countries and place them into 4 categorical regime types:
+<em>full democracies</em>, <em>flawed democracies</em>, <em>hybrid
+regimes</em>, and <em>authoritarian regimes</em>. The Democracy Index is
+a more flexible framework due to a higher level of disaggregation,
+however, it’s limited in that it only provides data for 2006 until the
+present. Moreover, the Democracy Index is behind a pay-wall and relies
+heavily on polling data that is highly intermittent for many countries.
+This introduces bias and limits comparisons across countries <span class="citation">(<strong>Wig2015?</strong>;
+<strong>Coppedge2017?</strong>)</span>. This introduces bias and limits
+comparisons across countries. Because of the limited temporal coverage,
+potential sources of bias, and it being developed and maintained by
+<em>The Economist</em>, the Democracy Index is more widely used in
+journalistic reporting than academic research where long established
+datasets like Polity and Freedom House reign supreme. That said, the
+Democracy Index still maintains a moderate presence across modern
+academic investigations of nation-state democracy and should not be
+dismissed outright.</p>
+<p>The Varieties of Democracy (V-Dem) dataset puts forth an even greater
+collection of disaggregated indicators (400+) depicting wide-ranging
+measures of democracy dating back to 1789. The size of V-Dem’s database
+is staggering, and even a bit intimidating, but they do offer a handful
+of high level composite indices more analogous to Polity and Freedom
+House. Additionally, there is the <a href="https://xmarquez.github.io/vdem/">vdemdata</a> R package <span class="citation">(<strong>V-DemInstitute2020?</strong>)</span> that
+provides search functionality and the ability to directly access the
+most recent version of the database directly from the V-Dem servers. One
+point of contrast for V-Dem is that it does not set out to define
+democracy for the user. Instead, V-Dem sets out to measure 7 core
+properties of democracy. These include highly disaggregated and clear
+assessments of <em>electoral</em>, <em>liberal</em>,
+<em>majoritarian</em>, <em>consensual</em>, <em>participatory</em>,
+<em>deliberative</em>, and <em>egalitarian</em> properties of democracy
+<span class="citation">(<strong>Coppedge2020?</strong>)</span>. This
+allows users to select the individual components most important to them
+and create composite variables that directly relate to their analysis.
+V-Dem is also transparent in their methodologies. They employ multiple
+independent coding teams, inter-coder reliability tests, confidence
+intervals for point estimates, and access to individual coder-level
+scoring <span class="citation">(<strong>Coppedge2017?</strong>)</span>.
+V-Dem requires some initial overhead to navigate the database for use in
+research or production pipelines, but many of my projects have been
+adopting the database in favor of Polity and Freedom House.</p>
+<p>None of these datasets are unequivocally superior to another. In some
+instances, highly focused binary flags for aspects of democracy and
+governance will be sufficient. In others, more detailed ordinal measures
+may be required to illuminated nuanced difference across target nations.
+Likewise, users may have specific requirements for target metrics,
+temporal coverage, and included nation-states. As always, the analyst
+must decide what’s appropriate for their intended use case.</p>
+<div id="reference" class="section level1">
+<h1>Reference</h1>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
