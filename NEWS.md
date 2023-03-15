@@ -1,3 +1,8 @@
+# demcon 0.4.0
+
+* Added support for Varieties of Democracy version 13.
+* Added informative error messages for missing remote data.
+
 # demcon 0.3.0
 
 * Examples updated to current dev stage.

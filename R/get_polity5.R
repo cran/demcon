@@ -36,7 +36,7 @@
 #' The Polity5 dataset contains 17,574 country-year observations and 37
 #' variables. For more information regarding variable descriptions and other
 #' dataset documentation, please refer to the
-#' [POLITY5: Political Regime Characteristics and Transitions, 1800-2018 Dataset Users’ Manual](http://www.systemicpeace.org/inscr/p5manualv2018.pdf).
+#' [POLITY5: Political Regime Characteristics and Transitions, 1800-2018 Dataset Users’ Manual](https://www.systemicpeace.org/inscr/p5manualv2018.pdf).
 #'
 get_polity5<-function(load=TRUE, del_file=TRUE, excel=TRUE, write_out = FALSE){
 
@@ -45,6 +45,9 @@ get_polity5<-function(load=TRUE, del_file=TRUE, excel=TRUE, write_out = FALSE){
 
   if (!file.exists(file.path(tempdir(), "p5v2018.xls"))) {
     url <- "http://www.systemicpeace.org/inscr/p5v2018.xls"
+
+    polity_response <- httr::HEAD(url)
+    if(polity_response$status_code!=200){stop("Polity5 data no longer available at given address.")}
 
     httr::GET(url = url, httr::write_disk(file.path(tempdir(), "p5v2018.xls"), overwrite = TRUE))
   }
@@ -58,6 +61,9 @@ get_polity5<-function(load=TRUE, del_file=TRUE, excel=TRUE, write_out = FALSE){
 
     if (!file.exists(file.path(tempdir(), "p5v2018.sav"))) {
       url <- "http://www.systemicpeace.org/inscr/p5v2018.sav"
+
+      polity_response <- httr::HEAD(url)
+      if(polity_response$status_code!=200){stop("Polity5 data no longer available at given address.")}
 
       httr::GET(url = url, httr::write_disk(file.path(tempdir(), "p5v2018.sav"), overwrite = TRUE))
     }

@@ -142,7 +142,7 @@
 #'
 #'   \itemize{
 #'   \item \href{https://constitutionnet.org/}{Constitution Net}
-#'   \item \href{http://countrystudies.us/}{Country Studies}
+#'   \item \href{https://countrystudies.us/}{Country Studies}
 #'   \item \href{https://law.stanford.edu/}{Stanford Law}
 #'   \item \href{https://exit.al/}{Exit News}
 #'   \item \href{https://en.wikipedia.org/wiki/Main_Page}{Wikipedia}
@@ -159,7 +159,6 @@
 #'   \item \href{http://www.scielo.org.za}{SciElo South Africa}
 #'   \item \href{https://www.gambia.dk/}{Nijii}
 #'   \item \href{https://www.lawhubgambia.com/}{Law Hub Gambia}
-#'   \item \href{https://www.artsrn.ualberta.ca/amcdouga/Hist247/winter_2017/resources/}{University of Alberta}
 #'   \item \href{https://pdba.georgetown.edu}{Political Database of the Americas}
 #'   \item \href{https://www.loc.gov}{Library of Congress}
 #'   \item \href{https://www.servat.unibe.ch/icl/}{International Constitutional Law Countries}
@@ -179,7 +178,7 @@
 #'   \item \href{https://www.marxists.org}{Marxist Internet Archive}
 #'   \item \href{http://www.sierra-leone.org}{Sierra Leone Web}
 #'   \item \href{https://www.gov.za/}{Government of South Africa}
-#'   \item \href{https://pkp.sfu.ca/ojs/}{Open Journal Systems}
+#'   \item \href{https://pkp.sfu.ca/software/ojs/}{Open Journal Systems}
 #'   \item \href{https://www.legislation.gov.uk}{UK Legislation}
 #'   \item \href{https://www.mfa.gov.tm/en}{Ministry of Foreign Affairs of Turkmenistan}
 #'   \item \href{https://www.statehouse.go.ug}{State House Uganda}

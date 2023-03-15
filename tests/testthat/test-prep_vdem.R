@@ -4,10 +4,10 @@ testthat::test_that("vdem hasn't changed",{
   data.table::setDT(vdem)
 
   # New release?
-  testthat::expect_equal(max(vdem$year), 2021)
+  testthat::expect_equal(max(vdem$year), 2022)
 
   # Has vdem packaged data changed dimensions
-  testthat::expect_equal(dim(vdem), c(27380, 4170))
+  testthat::expect_equal(dim(vdem), c(27555, 4602))
 
   # Still multiple palestine names?
   pal_names<-c("Palestine/West Bank",
@@ -77,7 +77,8 @@ testthat::test_that("prep vdem works",{
 
   testthat::expect_true("iso3" %in% names(vdem))
 
-  testthat::expect_equal(length(unique(vdem$iso3)), 177)
+  # this was 177 for V-Dem version 12.1--not sure who was removed.
+  testthat::expect_equal(length(unique(vdem$iso3)), 176)
 
   # microstates
   vdem <- demcon::prep_vdem(vdem, micro = FALSE)

@@ -41,7 +41,7 @@ monitoring regime change and studying the effects of regime authority.
 The Polity5 dataset contains 17,574 country-year observations and 37
 variables. For more information regarding variable descriptions and other
 dataset documentation, please refer to the
-\href{http://www.systemicpeace.org/inscr/p5manualv2018.pdf}{POLITY5: Political Regime Characteristics and Transitions, 1800-2018 Dataset Users’ Manual}.
+\href{https://www.systemicpeace.org/inscr/p5manualv2018.pdf}{POLITY5: Political Regime Characteristics and Transitions, 1800-2018 Dataset Users’ Manual}.
 }
 
 }

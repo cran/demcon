@@ -55,6 +55,9 @@ get_cce<-function(load=TRUE, del_file=TRUE, write_out = FALSE){
 
 cce_url<-"https://comparativeconstitutionsproject.org/data/ccpcce_v1_3.zip"
 
+cce_response <- httr::HEAD(cce_url)
+if(cce_response$status_code!=200){stop("CCE data no longer available at given address.")}
+
 if(!file.exists(file.path(tempdir(), "ccpcce_v1_3.zip"))) {
   utils::download.file(cce_url, file.path(tempdir(), "ccpcce_v1_3.zip"))
 }

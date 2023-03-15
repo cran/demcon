@@ -22,6 +22,10 @@
 get_vdem <- function(write_out = FALSE) {
   vdem_url <-
     "https://github.com/vdeminstitute/vdemdata/raw/master/data/vdem.RData"
+
+  vdem_response <- httr::HEAD(vdem_url)
+  if(vdem_response$status_code!=200){stop("V-Dem data no longer available at given address.")}
+
   vdem <- get(load(url(vdem_url)))
   data.table::setDT(vdem)
 

@@ -96,7 +96,7 @@ cshp_mult <-
       panel.grid.major = ggplot2::element_line(
         color = "#808080",
         linetype = "dashed",
-        size = 0.5),
+        linewidth = 0.5),
       panel.background = ggplot2::element_rect(fill = "aliceblue"))
 
   if(jitter_labs==TRUE){

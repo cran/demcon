@@ -30,19 +30,41 @@ document.addEventListener('DOMContentLoaded', function(e) {
 </script>
 
 <style type="text/css">
-  code{white-space: pre-wrap;}
-  span.smallcaps{font-variant: small-caps;}
-  span.underline{text-decoration: underline;}
-  div.column{display: inline-block; vertical-align: top; width: 50%;}
-  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
-  ul.task-list{list-style: none;}
-    </style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
 
 
 
 
 
 
+<style type="text/css">
+
+div.csl-bib-body { }
+div.csl-entry {
+clear: both;
+}
+.hanging div.csl-entry {
+margin-left:2em;
+text-indent:-2em;
+}
+div.csl-left-margin {
+min-width:2em;
+float:left;
+}
+div.csl-right-inline {
+margin-left:2em;
+padding-left:1em;
+}
+div.csl-indent {
+margin-left: 2em;
+}
+</style>
 
 <style type="text/css">body {
 background-color: #fff;
@@ -255,19 +277,19 @@ categories: 1) a mix of composite indices and measures of institutional
 behaviors and outcomes coded by teams of local experts, and 2) <em>de
 jure</em> measurements of directly observable institutional
 characteristics.</p>
-<p>Datasets offered by Polity <span class="citation">(<strong>Marshall2020?</strong>)</span> and Freedom
-House <span class="citation">(<strong>FreedomHouse2021?</strong>)</span>
-generally fall into the former, while direct assessments of
+<p>Datasets offered by Polity <span class="citation">(Marshall and Gurr
+2020)</span> and Freedom House <span class="citation">(Freedom House
+2021)</span> generally fall into the former, while direct assessments of
 constitutional and electoral structure like the Institutions and
-Elections Project <span class="citation">(<strong>Wig2015?</strong>)</span> and the Comparative
-Constitutions Project <span class="citation">(<strong>Elkins2009?</strong>)</span> make up the
-latter. Other datasets like the Varieties of Democracy <span class="citation">(<strong>Coppedge2017?</strong>)</span> present an
-interesting blend of both. Neither are better than the other; they both
-have their merits depending on the use case. Relying on composite
-indices derived by long time experts can spare you weeks of exploratory
-analysis and derived variable construction, while using highly
-disaggregated metrics or <em>de jure</em> measures of institutional
-capability may better serve narrowly focused research questions.</p>
+Elections Project <span class="citation">(Wig, Hegre, and Regan
+2015)</span> and the Comparative Constitutions Project <span class="citation">(Elkins, Ginsburg, and Melton 2009a)</span> make up the
+latter. Other datasets like the Varieties of Democracy <span class="citation">(Coppedge et al. 2017)</span> present an interesting
+blend of both. Neither are better than the other; they both have their
+merits depending on the use case. Relying on composite indices derived
+by long time experts can spare you weeks of exploratory analysis and
+derived variable construction, while using highly disaggregated metrics
+or <em>de jure</em> measures of institutional capability may better
+serve narrowly focused research questions.</p>
 <p>The Institutions and Elections Project (IAEP) captures several
 aspects of historical national electoral procedures, electoral events,
 institutional provisions, and constitutional stability for 170 countries
@@ -286,6 +308,11 @@ current constitution and the number of years the current constitution
 has been in effect. These variables would be helpful for assessing
 constitutional or regime stability, but in my experience they suffer
 from severe coding inconsistencies that render them unusable.</p>
+<pre><code>#&gt; Warning: Using `size` aesthetic for lines was deprecated in ggplot2 3.4.0.
+#&gt; ℹ Please use `linewidth` instead.
+#&gt; This warning is displayed once every 8 hours.
+#&gt; Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
+#&gt; generated.</code></pre>
 <div class="figure" style="text-align: center">
 <img src="data:image/png;base64,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" alt="Timeline of Chad&#39;s constitutional events. Data generated by the Comparative Constitution Project&#39;s Chronology of Constitutional Events dataset." />
 <p class="caption">
@@ -297,8 +324,8 @@ dataset.
 <p>The most similar dataset to IAEP is the Comparative Constitutions
 Project’s Characteristics of National Constitutions (CNP). The central
 goal of the Comparative Constitutions Project is to provide data to
-legal scholars assisting in the drafting of constitutions <span class="citation">(<strong>ComparativeConstitutionsProject2016?</strong>)</span>.
-In doing so, they created a rich resource for political scientists and
+legal scholars assisting in the drafting of constitutions <span class="citation">(Comparative Constitutions Project 2016)</span>. In
+doing so, they created a rich resource for political scientists and
 environment-security researchers looking to examine the causal
 relationships between institutional structure and political outcomes. In
 contrast to Freedom House and Polity V, CNP does not utilize abstract
@@ -317,13 +344,11 @@ annual forecasts using the data as it becomes more dated. In these
 instances, DPI may be a better dataset, because it receives updates
 every 2-4 years.</p>
 <p>Unlike IAEP, the Comparative Constitutions Project also provides 2
-datasets that are complimentary to the CNC: Constitute <span class="citation">(<strong>Elkins2014?</strong>;
-<strong>Elkins?</strong>)</span> and the Chronology of Constitutional
-Events <span class="citation">(<strong>Elkins2009a?</strong>;
-<strong>Elkins2020?</strong>)</span>. The Chronology of Constitutional
-Events (CCE) is a narrowly focused offering containing annual
-country-year observations of generalized “constitutional events”. There
-are 6 unique designations:</p>
+datasets that are complimentary to the CNC: Constitute <span class="citation">(Elkins et al. 2014; Elkins, Ginsburg, and Melton,
+n.d.)</span> and the Chronology of Constitutional Events <span class="citation">(Elkins, Ginsburg, and Melton 2009b, 2020)</span>. The
+Chronology of Constitutional Events (CCE) is a narrowly focused offering
+containing annual country-year observations of generalized
+“constitutional events”. There are 6 unique designations:</p>
 <ol style="list-style-type: decimal">
 <li>New Constitution</li>
 <li>Amendment</li>
@@ -356,8 +381,67 @@ service</a> so programmatic requests can be made to the database.</p>
 <p>All together, the IAEP and Comparative Constitutions Project’s CNC,
 CCE, and Constitute provide a fantastic and comprehensive resource for
 researchers and practitioners across a wide range of disciplines.</p>
-<div id="reference" class="section level1">
-<h1>Reference</h1>
+<div id="reference" class="section level1 unnumbered">
+<h1 class="unnumbered">Reference</h1>
+<div id="refs" class="references csl-bib-body hanging-indent">
+<div id="ref-ComparativeConstitutionsProject2016" class="csl-entry">
+Comparative Constitutions Project. 2016. <span>“About the
+<span>CCP</span>.”</span> Institutional. <span>Comparative Constitutions
+Project</span>. 2016. <a href="https://comparativeconstitutionsproject.org/about-ccp/">https://comparativeconstitutionsproject.org/about-ccp/</a>.
+</div>
+<div id="ref-Coppedge2017" class="csl-entry">
+Coppedge, Michael, John Gerring, Staffan I. Lindberg, Svend-Erik
+Skaaning, and Jan Teorell. 2017. <span>“V-<span>Dem Comparisons</span>
+and <span>Contrasts</span> with <span>Other Measurement
+Projects</span>.”</span> SSRN Scholarly Paper ID 2951014.
+<span>Rochester, NY</span>: <span>Social Science Research
+Network</span>. <a href="https://doi.org/10.2139/ssrn.2951014">https://doi.org/10.2139/ssrn.2951014</a>.
+</div>
+<div id="ref-Elkins2009" class="csl-entry">
+Elkins, Zachary, Tom Ginsburg, and James Melton. 2009a. <span>“The
+Comparative Constitutions Project: <span>A</span> Cross-National
+Historical Dataset of Written Constitutions.”</span> <span>Comparative
+Constitutions Project</span>.
+</div>
+<div id="ref-Elkins2009a" class="csl-entry">
+———. 2009b. <em>The <span>Endurance</span> of <span>National
+Constitutions</span></em>. <span>Cambridge University Press</span>. <a href="https://books.google.com?id=mpgs_tqfuwUC">https://books.google.com?id=mpgs_tqfuwUC</a>.
+</div>
+<div id="ref-Elkins2020" class="csl-entry">
+———. 2020. <span>“Chronology of <span>Constitutional Events</span>,
+<span>Version</span> 1.3.”</span> <span>Comparative Constitutions
+Project</span>. <a href="https://comparativeconstitutionsproject.org/">https://comparativeconstitutionsproject.org/</a>.
+</div>
+<div id="ref-Elkins" class="csl-entry">
+———. n.d. <span>“Constitute: <span>The World</span>’s
+<span>Constitutions</span> to <span>Read</span>, <span>Search</span>,
+and <span>Compare</span>.”</span> <span>Comparative Constitutions
+Project</span>. <a href="https://constituteproject.org/">https://constituteproject.org/</a>.
+</div>
+<div id="ref-Elkins2014" class="csl-entry">
+Elkins, Zachary, Tom Ginsburg, James Melton, Robert Shaffer, Juan F.
+Sequeda, and Daniel P. Miranker. 2014. <span>“Constitute:
+<span>The</span> World’s Constitutions to Read, Search, and
+Compare.”</span> <em>Journal of Web Semantics</em>, Semantic <span>Web
+Challenge</span> 2013, 27–28 (August): 10–18. <a href="https://doi.org/10.1016/j.websem.2014.07.006">https://doi.org/10.1016/j.websem.2014.07.006</a>.
+</div>
+<div id="ref-FreedomHouse2021" class="csl-entry">
+Freedom House. 2021. <span>“Freedom in the <span>World</span>
+2021.”</span> <span>Washington DC</span>: <span>Freedom House</span>. <a href="https://freedomhouse.org/report/freedom-world">https://freedomhouse.org/report/freedom-world</a>.
+</div>
+<div id="ref-Marshall2020" class="csl-entry">
+Marshall, Monty G, and Ted R. Gurr. 2020. <span>“Polity5:
+<span>Political Regime Characteristics</span> and
+<span>Transitions</span>, 1800-2018 (<span>Dataset Users</span>’
+<span>Manual</span>).”</span> <span>Vienna, VA</span>.
+</div>
+<div id="ref-Wig2015" class="csl-entry">
+Wig, Tore, Håvard Hegre, and Patrick M. Regan. 2015. <span>“Updated Data
+on Institutions and Elections 1960–2012: Presenting the
+<span>IAEP</span> Dataset Version 2.0.”</span> <em>Research &amp;
+Politics</em> 2 (2): 2053168015579120. <a href="https://doi.org/10.1177/2053168015579120">https://doi.org/10.1177/2053168015579120</a>.
+</div>
+</div>
 </div>
 
 

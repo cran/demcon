@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-<img src="man/figures/logo.svg" align="right" height="139" />
+<img src="man/figures/logo.svg" align="right" height="150" style="float:right; height:150px; padding: 10px;">
 
 # demcon
 
@@ -30,8 +30,14 @@ environment-security students, scholars, and practitioners worldwide.
 
 ## Installation
 
-You can install the released version of **demcon** from DANTE’s GitLab
-project.
+You can install the current stable release of **demcon** from CRAN:
+
+``` r
+install.packages('demcon')
+```
+
+Or, you may install the latest development version over GitLab from
+DANTE’s GitLab project.
 
 ``` r
 devtools::install_gitlab("dante-sttr/demcon")
@@ -45,17 +51,49 @@ website](https://dante-sttr.gitlab.io/demcon/index.html).
 **demcon** currently provides brief review or programmatic support for
 several political datasets:
 
--   Varieties of Democracy
--   Polity5
--   Freedom House’s Freedom in the World
--   Database of Political Institutions
--   The Economists’ Democracy Index
--   Institutions and Elections Project
--   Comparative Constitution Project:
-    -   Characteristics of National Constitutions
-    -   Chronology of Constitutional Events
-    -   Constitute
--   **cshapes**
+- Varieties of Democracy
+- Polity5
+- Freedom House’s Freedom in the World
+- Database of Political Institutions
+- The Economists’ Democracy Index
+- Institutions and Elections Project
+- Comparative Constitution Project:
+  - Characteristics of National Constitutions
+  - Chronology of Constitutional Events
+  - Constitute
+- **cshapes**
+
+This also includes functions that adapt peer-reviewed methodologies from
+current high impact publications. These include:
+
+- Vertical and horizontal constraints indices adapted from Fjelde, H.,
+  Knutsen, C. H. & Nygård, H. M. 2021. [*Which Institutions Matter?
+  Re-Considering the Democratic Civil
+  Peace*](https://doi.org/10.1093/isq/sqaa076). International Studies
+  Quarterly 65, 223–237.
+- Polity 5 regime classifications as described in Goldstone, J. A. et
+  al. [*A Global Model for Forecasting Political
+  Instability*](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=1531942).
+  American Journal of Political Science 54, 190–208 2010.
+- Pernicious and rapid polarization as described in [*Pernicious
+  polarization, autocratization and opposition
+  strategies*](https://doi.org/10.1080/13510347.2020.1865316),
+  Democratization, 20, 929-948, 2021.
+
+**demcon** also provides short vignettes that help users acquaint
+themselves with key constitutional datasets and analytic techniques.
+These include:
+
+- [A Brief Review of Constitutional
+  Datasets](https://dante-sttr.gitlab.io/demcon/articles/constitution-datasets.html)
+- [A Brief Review of Democratic and Authoritarian
+  Datasets](https://dante-sttr.gitlab.io/demcon/articles/dem-datasets.html)
+- [Pre-Processing the Varieties of Democracy
+  Dataset](https://dante-sttr.gitlab.io/demcon/articles/clean-vdem.html)
+- [Calculating Executive Constraints
+  Indices](https://dante-sttr.gitlab.io/demcon/articles/constraint-indices.html)
+- [Country Coding Considerations for Dataset Harmonization and Applied
+  Uses](https://dante-sttr.gitlab.io/demcon/articles/ccode-considerations.html)
 
 ## Using demcon
 
@@ -86,7 +124,6 @@ head(polity)
 #> #   eyear <chr>, eprec <chr>, interim <chr>, bmonth <chr>, bday <chr>,
 #> #   byear <chr>, bprec <chr>, post <chr>, change <chr>, d5 <chr>, sf <chr>,
 #> #   regtrans <chr>, and abbreviated variable name ¹​fragment
-#> # ℹ Use `colnames()` to see all variable names
 ```
 
 ### Processing Data
@@ -121,21 +158,4 @@ cce<-demcon::prep_cce(cce, evnttype_fix = TRUE)
 plot(cce, cntry = "Chile", years = c(1950, 2022))
 ```
 
-<img src="man/figures/README-unnamed-chunk-5-1.png" width="100%" />
-
-### Reference Materials
-
-**demcon** also provides short vignettes that help users acquaint
-themselves with key constitutional datasets and analytic techniques.
-These include:
-
--   [A Brief Review of Constitutional
-    Datasets](https://dante-sttr.gitlab.io/demcon/articles/constitution-datasets.html)
--   [A Brief Review of Democratic and Authoritarian
-    Datasets](https://dante-sttr.gitlab.io/demcon/articles/dem-datasets.html)
--   [Pre-Processing the Varieties of Democracy
-    Dataset](https://dante-sttr.gitlab.io/demcon/articles/clean-vdem.html)
--   [Calculating Executive Constraints
-    Indices](https://dante-sttr.gitlab.io/demcon/articles/constraint-indices.html)
--   [Country Coding Considerations for Dataset Harmonization and Applied
-    Uses](https://dante-sttr.gitlab.io/demcon/articles/ccode-considerations.html)
+<img src="man/figures/README-unnamed-chunk-6-1.png" width="100%" />

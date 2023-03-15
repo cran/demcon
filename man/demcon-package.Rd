@@ -11,8 +11,8 @@ An open-source toolkit developed by ISciences, LLC and the DANTE Project that is
 \seealso{
 Useful links:
 \itemize{
-  \item \url{https://gitlab.com/dante-sttr/demcon}
   \item \url{https://dante-sttr.gitlab.io/demcon/index.html}
+  \item \url{https://gitlab.com/dante-sttr/demcon}
   \item \url{https://www.isciences.com}
   \item Report bugs at \url{https://gitlab.com/dante-sttr/demcon/-/issues}
 }

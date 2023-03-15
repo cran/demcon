@@ -6,7 +6,7 @@ testthat::test_that("vdem source is still there and the same", {
 
   testthat::expect_equal(vdem_response$status_code, 200)
 
-  testthat::expect_equal(dim(vdem), c(27380, 4170))
+  testthat::expect_equal(dim(vdem), c(27555, 4602))
 
   # Check that all the VCI and HCI variables are still in w/ same names
   hci_components <- c('v2xlg_legcon', 'v2x_jucon')

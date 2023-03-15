@@ -96,10 +96,10 @@ cce_plot<-
                 title = paste0("Timeline of ", country_lab, " Constitutional Events"),
                 subtitle = "Data Generated from CCP's Chronology of Constitutional Events")+
   ggplot2::scale_color_manual(values=plot_pal[2:6])+
-  ggplot2::geom_hline(yintercept=0, color = plot_pal[1], size=2)+
+  ggplot2::geom_hline(yintercept=0, color = plot_pal[1], linewidth = 2)+
   ggplot2::geom_segment(data=dat,
                         ggplot2::aes(y=position,yend=0,xend=year),
-                        color=plot_pal[1], size=1, alpha = 0.5)+
+                        color=plot_pal[1], linewidth = 1, alpha = 0.5)+
   ggplot2::geom_point(ggplot2::aes(y=position, col=evnttype),
                       size=3)+
   ggplot2::theme_classic()+
